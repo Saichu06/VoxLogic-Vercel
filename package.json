@@ -4,11 +4,12 @@
   "description": "SRM VoxLogic - Digital Logic Simulator for SRMIST DLD Laboratory",
   "main": "api/ai.js",
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel deploy --prod",
+    "dev": "node server.js",
     "start": "node server.js",
     "server": "nodemon server.js",
-    "build": "echo 'No build step required'"
+    "build": "echo \"No build step required\"",
+    "vercel-dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
   },
   "keywords": [
     "digital-logic",
