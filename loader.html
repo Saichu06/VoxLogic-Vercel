@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRM VoxLogic — Loading</title>
+<link rel="icon" type="image/png" href="logo.png">   
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#03070f;font-family:'Space Mono',monospace;cursor:none;}
+
+#canvas3d{position:fixed;inset:0;z-index:0;}
+
+#scanlines{position:fixed;inset:0;z-index:5;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,207,223,0.012) 2px,rgba(0,207,223,0.012) 4px);pointer-events:none;}
+
+#logo{position:fixed;top:32px;left:40px;z-index:20;}
+#logo h1{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#00cfdf,#3a6eea);-webkit-background-clip:text;background-clip:text;color:transparent;}
+#logo p{font-size:10px;color:#4a6880;letter-spacing:2px;margin-top:4px;}
+
+#status{position:fixed;top:32px;right:40px;z-index:20;text-align:right;}
+#status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#00cfdf;margin-right:8px;animation:blink 1.1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+#status-txt{font-size:11px;letter-spacing:2px;color:#00cfdf;}
+
+#bubble{
+  position:fixed;z-index:30;
+  background:rgba(3,8,20,0.93);
+  border:1px solid rgba(0,207,223,0.4);
+  border-radius:18px 18px 18px 4px;
+  padding:14px 20px;
+  max-width:260px;
+  font-size:13px;line-height:1.65;
+  color:#d8eaf2;
+  pointer-events:none;
+  transition:opacity .45s;
+  box-shadow:0 0 30px rgba(0,207,223,0.08);
+}
+#bubble::before{
+  content:'';position:absolute;bottom:-11px;left:18px;
+  border-left:11px solid transparent;
+  border-top:11px solid rgba(0,207,223,0.4);
+}
+#bubble::after{
+  content:'';position:absolute;bottom:-9px;left:19px;
+  border-left:9px solid transparent;
+  border-top:9px solid rgba(3,8,20,0.93);
+}
+
+#bottom{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:24px 48px 34px;}
+#prog-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+#prog-label span{font-size:10px;letter-spacing:2px;color:#3a5870;}
+#pct{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:#00cfdf;}
+#bar-track{width:100%;height:2px;background:rgba(0,207,223,0.08);border-radius:2px;overflow:visible;position:relative;}
+#bar-fill{height:2px;width:0%;background:linear-gradient(90deg,#00cfdf,#3a6eea,#6c3ddd);border-radius:2px;transition:width .1s linear;position:relative;}
+#bar-fill::after{content:'';position:absolute;right:0;top:50%;transform:translate(50%,-50%);width:7px;height:7px;border-radius:50%;background:#00cfdf;box-shadow:0 0 8px #00cfdf;}
+#steps{display:flex;gap:10px;margin-top:16px;}
+.stp{flex:1;height:1.5px;background:rgba(0,207,223,0.08);border-radius:2px;position:relative;transition:background .4s;}
+.stp.active{background:rgba(0,207,223,0.35);}
+.stp.done{background:#00cfdf;}
+.stp-lbl{position:absolute;top:7px;left:0;font-size:9px;letter-spacing:1px;color:#1e3048;white-space:nowrap;transition:color .4s;}
+.stp.active .stp-lbl{color:#00cfdf;}
+.stp.done .stp-lbl{color:#00ff88;}
+
+.corner{position:fixed;width:36px;height:36px;z-index:20;}
+.corner.tl{top:18px;left:18px;border-top:1px solid rgba(0,207,223,0.25);border-left:1px solid rgba(0,207,223,0.25);}
+.corner.tr{top:18px;right:18px;border-top:1px solid rgba(0,207,223,0.25);border-right:1px solid rgba(0,207,223,0.25);}
+.corner.bl{bottom:18px;left:18px;border-bottom:1px solid rgba(0,207,223,0.25);border-left:1px solid rgba(0,207,223,0.25);}
+.corner.br{bottom:18px;right:18px;border-bottom:1px solid rgba(0,207,223,0.25);border-right:1px solid rgba(0,207,223,0.25);}
+
+#cur{position:fixed;width:14px;height:14px;border:1.5px solid #00cfdf;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cur::after{content:'';position:absolute;top:50%;left:50%;width:3px;height:3px;background:#00cfdf;border-radius:50%;transform:translate(-50%,-50%);}
+</style>
+</head>
+<body>
+
+<canvas id="canvas3d"></canvas>
+<div id="scanlines"></div>
+<div id="cur"></div>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div id="logo">
+  <h1>DIGILAB</h1>
+  <p>SRMIST · ECE DEPARTMENT · DLD SIMULATOR v2.0</p>
+</div>
+
+<div id="status">
+  <span id="status-dot"></span><span id="status-txt">INITIALIZING</span>
+</div>
+
+<div id="bubble"><span id="btext">Hey! I'm DigiBot.<br>Get ready to simulate!</span></div>
+
+<div id="bottom">
+  <div id="prog-label">
+    <span id="stage-lbl">BOOTING SYSTEMS</span>
+    <span id="pct">0%</span>
+  </div>
+  <div id="bar-track"><div id="bar-fill"></div></div>
+  <div id="steps">
+    <div class="stp" id="s0"><span class="stp-lbl">INIT</span></div>
+    <div class="stp" id="s1"><span class="stp-lbl">GATES</span></div>
+    <div class="stp" id="s2"><span class="stp-lbl">AI ENGINE</span></div>
+    <div class="stp" id="s3"><span class="stp-lbl">VOICE</span></div>
+    <div class="stp" id="s4"><span class="stp-lbl">READY</span></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===== RENDERER ===== */
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('canvas3d'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x03070f);
+scene.fog=new THREE.FogExp2(0x03070f,0.025);
+
+const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,0.1,300);
+camera.position.set(0,2.5,13);
+camera.lookAt(0,1.5,0);
+
+window.addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+/* ===== LIGHTS ===== */
+scene.add(new THREE.AmbientLight(0x0d2233,1.5));
+const sun=new THREE.DirectionalLight(0x4488ff,2.8);
+sun.position.set(6,12,8); sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+scene.add(sun);
+const fill=new THREE.PointLight(0x00cfdf,4,22);
+fill.position.set(-5,4,5);
+scene.add(fill);
+const back=new THREE.PointLight(0x6c3ddd,2.5,18);
+back.position.set(5,-1,-5);
+scene.add(back);
+const rim=new THREE.PointLight(0xff6030,1.5,12);
+rim.position.set(3,5,3);
+scene.add(rim);
+
+/* ===== MATERIALS ===== */
+const mBody   =new THREE.MeshPhongMaterial({color:0x0c1e38,emissive:0x001020,shininess:120,specular:0x00cfdf});
+const mAccent =new THREE.MeshPhongMaterial({color:0x00cfdf,emissive:0x005a65,shininess:240});
+const mGlow   =new THREE.MeshPhongMaterial({color:0x00cfdf,emissive:0x00cfdf,emissiveIntensity:1,shininess:400});
+const mDark   =new THREE.MeshPhongMaterial({color:0x050c18,shininess:40});
+const mVisor  =new THREE.MeshPhongMaterial({color:0x00e8ff,emissive:0x00cfdf,emissiveIntensity:0.8,transparent:true,opacity:0.7,shininess:500});
+const mJoint  =new THREE.MeshPhongMaterial({color:0x182c44,emissive:0x060e1c,shininess:60});
+const mOrange =new THREE.MeshPhongMaterial({color:0xff5522,emissive:0x991500,emissiveIntensity:0.8,shininess:300});
+const mViolet =new THREE.MeshPhongMaterial({color:0x6c3ddd,emissive:0x3a1880,emissiveIntensity:0.5,shininess:200});
+
+const B=(w,h,d,m)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.castShadow=o.receiveShadow=true;return o;};
+const C=(rt,rb,h,s,m)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);o.castShadow=true;return o;};
+const S=(r,m)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,20,20),m);o.castShadow=true;return o;};
+
+/* ===== ROBOT ===== */
+const robot=new THREE.Group();
+scene.add(robot);
+
+/* --- TORSO --- */
+const torso=B(2.0,1.7,1.2,mBody);
+robot.add(torso);
+
+/* chest panel */
+const panel=B(1.1,0.65,0.15,mDark);
+panel.position.set(0,0.1,0.63);
+torso.add(panel);
+
+/* chest grill lines */
+for(let i=0;i<3;i++){
+  const g=B(0.8,0.055,0.1,[mGlow,mAccent,mViolet][i]);
+  g.position.set(0,0.18-i*0.15,0.07);
+  panel.add(g);
+}
+
+/* pulsing core orb */
+const core=S(0.12,mOrange);
+core.position.set(0,-0.24,0.1);
+panel.add(core);
+
+/* shoulder guards */
+[-1,1].forEach(s=>{
+  const sg=B(0.42,0.55,0.65,mBody);
+  sg.position.set(s*1.22,0.42,0);
+  torso.add(sg);
+  B(0.12,0.42,0.66,mAccent).position.set(-s*0.14,0,0);
+  sg.add(B(0.12,0.42,0.66,mAccent));
+  const sgGem=S(0.08,mOrange);
+  sgGem.position.set(s*0.01,0.2,0.34);
+  sg.add(sgGem);
+});
+
+/* waist band */
+const waist=B(1.85,0.18,1.15,mAccent);
+waist.position.set(0,-0.82,0);
+torso.add(waist);
+
+/* --- NECK --- */
+const neck=C(0.2,0.24,0.32,8,mJoint);
+neck.position.set(0,1.0,0);
+robot.add(neck);
+
+/* --- HEAD --- */
+const HEAD=new THREE.Group();
+HEAD.position.set(0,1.86,0);
+robot.add(HEAD);
+
+const skull=B(1.55,1.25,1.3,mBody);
+HEAD.add(skull);
+
+/* brow ridge */
+const brow=B(1.2,0.12,0.22,mAccent);
+brow.position.set(0,0.28,0.64);
+HEAD.add(brow);
+
+/* visor */
+const visor=B(1.1,0.42,0.18,mVisor);
+visor.position.set(0,0.06,0.66);
+HEAD.add(visor);
+
+/* scan line inside visor */
+const scanLine=B(0.9,0.055,0.2,mGlow);
+scanLine.position.set(0,0,0);
+visor.add(scanLine);
+
+/* under-eye dots */
+[-0.3,0.3].forEach(ex=>{
+  const dot=S(0.075,mGlow);
+  dot.position.set(ex,-0.26,0.68);
+  HEAD.add(dot);
+});
+
+/* mouth grille */
+for(let i=-3;i<=3;i++){
+  const tooth=B(0.09,0.08,0.12,i%2===0?mAccent:mDark);
+  tooth.position.set(i*0.14,-0.4,0.67);
+  HEAD.add(tooth);
+}
+
+/* ear fins */
+[-1,1].forEach(s=>{
+  const ear=B(0.1,0.6,0.38,mAccent);
+  ear.position.set(s*0.84,0.12,0);
+  HEAD.add(ear);
+  const earTip=B(0.08,0.14,0.26,mGlow);
+  earTip.position.set(0,0.38,0);
+  ear.add(earTip);
+});
+
+/* top ridge */
+const topRidge=B(1.1,0.12,0.55,mAccent);
+topRidge.position.set(0,0.67,0);
+HEAD.add(topRidge);
+
+/* antenna */
+const antB=C(0.07,0.1,0.3,6,mJoint);
+antB.position.set(0,0.78,0);
+HEAD.add(antB);
+const antM=C(0.04,0.07,0.4,6,mBody);
+antM.position.set(0,0.52,0);
+antB.add(antM);
+const antTip=S(0.11,mOrange);
+antTip.position.set(0,0.32,0);
+antM.add(antTip);
+
+/* --- HIPS --- */
+const hips=B(1.8,0.4,1.1,mBody);
+hips.position.set(0,-1.07,0);
+robot.add(hips);
+[-0.55,0.55].forEach(hx=>{
+  const hd=B(0.35,0.24,0.22,mDark);
+  hd.position.set(hx,0,0.58);
+  hips.add(hd);
+  const hdg=B(0.22,0.06,0.1,mAccent);
+  hdg.position.set(0,0.09,0.08);
+  hd.add(hdg);
+});
+
+/* --- ARMS --- */
+const LA=new THREE.Group(); LA.position.set(-1.4,0.3,0); robot.add(LA);
+const RA=new THREE.Group(); RA.position.set( 1.4,0.3,0); robot.add(RA);
+[LA,RA].forEach((arm,i)=>{
+  const upper=B(0.52,1.0,0.52,mBody); upper.position.set(0,-0.5,0); arm.add(upper);
+  const stripe=B(0.53,0.1,0.53,mAccent); stripe.position.set(0,-0.2,0); upper.add(stripe);
+  const elbow=S(0.25,mJoint); elbow.position.set(0,-1.06,0); arm.add(elbow);
+  const lower=B(0.44,0.82,0.44,mBody); lower.position.set(0,-1.56,0); arm.add(lower);
+  const hand=B(0.48,0.36,0.5,mDark); hand.position.set(0,-2.05,0); arm.add(hand);
+  const knuckle=B(0.35,0.1,0.5,mAccent); knuckle.position.set(0,0.14,0); hand.add(knuckle);
+});
+
+/* --- LEGS --- */
+const LL=new THREE.Group(); LL.position.set(-0.6,-1.28,0); robot.add(LL);
+const RL=new THREE.Group(); RL.position.set( 0.6,-1.28,0); robot.add(RL);
+[LL,RL].forEach((leg,i)=>{
+  const upper=B(0.72,1.1,0.72,mBody); upper.position.set(0,-0.55,0); leg.add(upper);
+  const stripe=B(0.73,0.1,0.73,mAccent); stripe.position.set(0,-0.25,0); upper.add(stripe);
+  const knee=S(0.3,mJoint); knee.position.set(0,-1.14,0); leg.add(knee);
+  const lower=B(0.62,0.95,0.66,mBody); lower.position.set(0,-1.68,0); leg.add(lower);
+  const foot=B(0.78,0.3,1.05,mDark); foot.position.set(0,-2.28,0.14); leg.add(foot);
+  const toeStripe=B(0.62,0.08,0.14,mAccent); toeStripe.position.set(0,-0.09,0.52); foot.add(toeStripe);
+  const heel=B(0.62,0.08,0.14,mViolet); heel.position.set(0,-0.09,-0.44); foot.add(heel);
+});
+
+/* base Y so feet touch floor */
+const FLOOR_Y=2.5;
+robot.position.y=FLOOR_Y;
+
+/* ===== FLOOR ===== */
+const grid=new THREE.GridHelper(60,60,0x0a1e30,0x081828);
+grid.position.y=-2.95;
+scene.add(grid);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshPhongMaterial({color:0x020810,shininess:20,transparent:true,opacity:0.85}));
+floor.rotation.x=-Math.PI/2; floor.position.y=-2.96; floor.receiveShadow=true;
+scene.add(floor);
+
+/* shadow blob */
+const shadowBlob=new THREE.Mesh(new THREE.CircleGeometry(1.4,32),new THREE.MeshBasicMaterial({color:0x00cfdf,transparent:true,opacity:0.14}));
+shadowBlob.rotation.x=-Math.PI/2; shadowBlob.position.y=-2.94;
+scene.add(shadowBlob);
+
+/* ===== BG CHIPS ===== */
+const chipGeo=new THREE.BoxGeometry(1.3,0.8,0.18);
+const edgesG=new THREE.EdgesGeometry(chipGeo);
+const bgChips=[];
+const cc=[0x00cfdf,0x3a6eea,0x6c3ddd,0xff6030];
+for(let i=0;i<30;i++){
+  const g=new THREE.Group();
+  g.add(new THREE.Mesh(chipGeo,new THREE.MeshPhongMaterial({color:0x060d1c,transparent:true,opacity:0.65})));
+  g.add(new THREE.LineSegments(edgesG,new THREE.LineBasicMaterial({color:cc[i%4],transparent:true,opacity:0.55})));
+  const r=10+Math.random()*14,th=Math.random()*Math.PI*2,ph=(Math.random()-.5)*Math.PI*.75;
+  g.position.set(r*Math.cos(ph)*Math.cos(th),r*Math.cos(ph)*Math.sin(th)+1,r*Math.sin(ph));
+  g.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+  g.userData={rx:(Math.random()-.5)*.006,ry:(Math.random()-.5)*.009,rz:(Math.random()-.5)*.005,oy:g.position.y,fo:Math.random()*Math.PI*2,fs:.3+Math.random()*.5};
+  scene.add(g); bgChips.push(g);
+}
+
+/* ===== PARTICLES ===== */
+const pP=new Float32Array(2400*3);
+for(let i=0;i<2400;i++){pP[i*3]=(Math.random()-.5)*90;pP[i*3+1]=(Math.random()-.5)*70;pP[i*3+2]=(Math.random()-.5)*60;}
+const pGeo=new THREE.BufferGeometry();
+pGeo.setAttribute('position',new THREE.BufferAttribute(pP,3));
+scene.add(new THREE.Points(pGeo,new THREE.PointsMaterial({color:0x00cfdf,size:0.065,transparent:true,opacity:0.38})));
+
+/* ===== SPEECH BUBBLE ===== */
+const bubbleEl=document.getElementById('bubble');
+const btextEl=document.getElementById('btext');
+const msgs=[
+  "Hey! I'm DigiBot!<br>Ready to learn DLD?",
+  "Logic gates are<br>my favourite snack!",
+  "AND, OR, NOT...<br>I know them all!",
+  "Do your simulations<br>well, okay? I'm watching!",
+  "Truth tables?<br>Easy for me!",
+  "Build cool circuits<br>with DigiLab!",
+  "K-maps, flip-flops...<br>We got it all!",
+  "Almost ready!<br>Stay sharp, cadet!"
+];
+let mIdx=0;
+function nextMsg(){
+  bubbleEl.style.opacity='0';
+  setTimeout(()=>{btextEl.innerHTML=msgs[mIdx%msgs.length];mIdx++;bubbleEl.style.opacity='1';},420);
+}
+nextMsg();
+setInterval(nextMsg,3000);
+
+/* ===== MOUSE ===== */
+let mxN=0,myN=0;
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{
+  mxN=e.clientX/innerWidth-.5; myN=e.clientY/innerHeight-.5;
+  cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+});
+
+/* ===== ANIMATION ===== */
+let t=0, jumpT=0;
+const JUMP_SPEED=1.8, JUMP_H=4.0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  t+=0.016;
+  jumpT+=0.016*JUMP_SPEED;
+
+  /* Jump: sine-based bounce */
+  const jy = Math.abs(Math.sin(jumpT))*JUMP_H;
+  robot.position.y=FLOOR_Y+jy;
+
+  /* squash at landing, stretch at peak */
+  const norm=jy/JUMP_H;
+  const sy=0.88+norm*0.28;
+  const sxz=1.1-norm*0.12;
+  robot.scale.set(sxz,sy,sxz);
+
+  /* shadow shrinks as robot rises */
+  const sc=Math.max(0.2,1-norm*0.75);
+  shadowBlob.scale.set(sc,sc,sc);
+  shadowBlob.material.opacity=0.14*sc;
+
+  /* arm swing */
+  const sw=Math.sin(t*2.8)*0.65;
+  LA.rotation.x= sw; RA.rotation.x=-sw;
+
+  /* leg swing */
+  const lsw=Math.sin(t*2.8)*0.45;
+  LL.rotation.x=-lsw; RL.rotation.x=lsw;
+
+  /* head look + bob */
+  HEAD.rotation.y=Math.sin(t*0.8)*0.3+mxN*0.35;
+  HEAD.rotation.x=Math.sin(t*1.5)*0.07-myN*0.15;
+  HEAD.rotation.z=Math.sin(t*1.1)*0.04;
+
+  /* torso tilt */
+  robot.rotation.y=mxN*0.25+Math.sin(t*0.4)*0.1;
+  robot.rotation.z=Math.sin(t*1.3)*0.03;
+
+  /* visor scan */
+  scanLine.position.y=Math.sin(t*5)*0.1;
+  scanLine.material.emissiveIntensity=0.4+Math.sin(t*7)*0.6;
+
+  /* antenna blink */
+  antTip.material.emissiveIntensity=0.5+Math.sin(t*9)*0.5;
+
+  /* core pulse */
+  core.material.emissiveIntensity=0.4+Math.sin(t*6)*0.6;
+  core.scale.setScalar(0.85+Math.sin(t*6)*0.18);
+
+  /* bg chips */
+  bgChips.forEach(c=>{
+    c.rotation.x+=c.userData.rx;
+    c.rotation.y+=c.userData.ry;
+    c.position.y=c.userData.oy+Math.sin(t*c.userData.fs+c.userData.fo)*0.45;
+  });
+
+  /* orbiting fill light */
+  fill.position.x=Math.sin(t*0.45)*8;
+  fill.position.z=Math.cos(t*0.45)*8;
+
+  /* bubble follows robot head in screen space */
+  const hw=new THREE.Vector3();
+  HEAD.getWorldPosition(hw);
+  hw.y+=1.2;
+  const proj=hw.clone().project(camera);
+  const bx=(proj.x*.5+.5)*innerWidth;
+  const by=(-proj.y*.5+.5)*innerHeight;
+  bubbleEl.style.left=(bx+28)+'px';
+  bubbleEl.style.top=(by-100)+'px';
+
+  renderer.render(scene,camera);
+}
+animate();
+
+/* ===== LOADING ===== */
+const STAGES=['BOOTING SYSTEMS','LOADING LOGIC GATES','INITIALIZING AI ENGINE','SYNCING VOICE MODULE','FINALIZING — ALMOST READY'];
+const stepEls=[0,1,2,3,4].map(i=>document.getElementById('s'+i));
+const barFill=document.getElementById('bar-fill');
+const pctEl=document.getElementById('pct');
+const stageLbl=document.getElementById('stage-lbl');
+const statusTxt=document.getElementById('status-txt');
+
+let prog=0;
+const iv=setInterval(()=>{
+  prog+=Math.random()*2.2+0.5;
+  if(prog>=100){prog=100;clearInterval(iv);done();}
+  barFill.style.width=prog+'%';
+  pctEl.textContent=Math.floor(prog)+'%';
+  const si=Math.min(4,Math.floor(prog/20));
+  stageLbl.textContent=STAGES[si];
+  statusTxt.textContent=STAGES[si];
+  stepEls.forEach((el,i)=>{
+    if(prog>=(i+1)*20){el.classList.add('done');el.classList.remove('active');}
+    else if(prog>=i*20){el.classList.add('active');}
+    else el.classList.remove('active','done');
+  });
+},80);
+
+function done(){
+  pctEl.style.color='#00ff88';
+  pctEl.textContent='100%';
+  statusTxt.textContent='ALL SYSTEMS GO';
+  stageLbl.textContent='LAUNCHING SIMULATOR...';
+  btextEl.innerHTML="Let's GO! Time to<br>simulate circuits!";
+  barFill.style.background='linear-gradient(90deg,#00ff88,#00cfdf)';
+  setTimeout(()=>{window.location.href='try2ds.html';},1600);
+}
+</script>
+</body>
+</html>

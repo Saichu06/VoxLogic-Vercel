@@ -1,0 +1,21 @@
+{
+  "name": "voxlogic-host",
+  "version": "1.0.0",
+  "description": "eLogic — Digital Logic Simulator\r Project Description\r eLogic is an interactive web-based digital logic simulator developed for the Digital Logic Design Laboratory at SRM Institute of Science and Technology. It allows students to design, simulate, and analyze digital circuits without physical hardware components.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.14"
+  }
+}

@@ -1,0 +1,4200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="logo.png">
+  <title>SRM VoxLogic — Lab Manual</title>
+  <style>
+    :root {
+      --bg: #04070c;
+      --bg2: #070c14;
+      --panel: #080e18;
+      --panel2: #0c1420;
+      --panel3: #101a28;
+      --border: #162032;
+      --border2: #1e2e44;
+      --border3: #243650;
+      --cyan: #00d4ff;
+      --cyan2: #0099bb;
+      --cyan3: #005577;
+      --green: #00ff88;
+      --green2: #00cc6a;
+      --orange: #ff8c42;
+      --yellow: #ffd166;
+      --red: #ff3355;
+      --purple: #b388ff;
+      --pink: #ff6eb4;
+      --teal: #00e5cc;
+      --text: #c8dff0;
+      --text2: #7fa4c0;
+      --text3: #4a6a88;
+      --text-dim: #2d4a62;
+      --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1);
+      --glow-green: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 60px rgba(0, 255, 136, 0.1);
+      --radius: 6px;
+    }
+
+    /* Light theme overrides - MUST be outside :root */
+    [data-theme="light"] {
+      --bg: #f0f4f8;
+      --bg2: #e8edf2;
+      --panel: #ffffff;
+      --panel2: #f8fafc;
+      --panel3: #eef2f6;
+      --border: #d0dce8;
+      --border2: #b8cce0;
+      --border3: #9ab0c8;
+      --cyan: #0077aa;
+      --cyan2: #005f88;
+      --cyan3: #004466;
+      --green: #008844;
+      --green2: #006633;
+      --orange: #cc4400;
+      --yellow: #cc8800;
+      --red: #cc1133;
+      --purple: #7755cc;
+      --pink: #cc5599;
+      --teal: #008877;
+      --text: #1a2d42;
+      --text2: #3a5878;
+      --text3: #5a7898;
+      --text-dim: #8aaac0;
+      --glow-cyan: 0 0 10px rgba(0, 119, 170, 0.15);
+      --glow-green: 0 0 10px rgba(0, 136, 68, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* ── EXPERIMENT OUTPUT IMAGE ── */
+    .exp-output {
+      margin: 20px 0;
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .exp-output-header {
+      background: var(--panel);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .exp-output-header::before {
+      content: '🖻';
+      font-size: 12px;
+    }
+
+    .exp-output-image {
+      padding: 16px;
+      text-align: center;
+      background: var(--bg);
+    }
+
+    .exp-output-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .exp-output-caption {
+      padding: 8px 16px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SCANLINES ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 180, 255, 0.008) 2px, rgba(0, 180, 255, 0.008) 4px);
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* ── ANIMATED BACKGROUND ── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .bg-orb1,
+    .bg-orb2,
+    .bg-orb3 {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .bg-orb1 {
+      width: 600px;
+      height: 600px;
+      background: rgba(0, 100, 200, 0.06);
+      top: -200px;
+      right: -100px;
+    }
+
+    .bg-orb2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(0, 200, 150, 0.04);
+      bottom: 100px;
+      left: -100px;
+      animation-delay: -7s;
+      animation-duration: 25s;
+    }
+
+    .bg-orb3 {
+      width: 300px;
+      height: 300px;
+      background: rgba(150, 50, 255, 0.03);
+      top: 40%;
+      left: 40%;
+      animation-delay: -13s;
+      animation-duration: 30s;
+    }
+
+    @keyframes orbFloat {
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(30px, -40px) scale(1.1);
+      }
+
+      66% {
+        transform: translate(-20px, 30px) scale(0.9);
+      }
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 60px;
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--cyan) 30%, var(--teal) 50%, var(--green) 70%, transparent 100%);
+      opacity: .5;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .logo-text span {
+      color: var(--cyan);
+    }
+
+    .logo-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      letter-spacing: 2px;
+      display: block;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+
+    .badge-live {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .badge-live::before {
+      content: '● ';
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .search-btn {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      padding: 7px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s;
+    }
+
+    .search-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidenav {
+      width: 260px;
+      background: var(--panel2);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidenav::-webkit-scrollbar {
+      width: 2px;
+    }
+
+    .sidenav::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 2px;
+    }
+
+    .sidenav-header {
+      padding: 20px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidenav-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--cyan);
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 2px;
+      height: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 2px;
+    }
+
+    .progress-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      margin-top: 5px;
+    }
+
+    .nav-section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      padding: 14px 20px 6px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      cursor: pointer;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all .18s;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(0, 212, 255, 0.04);
+      border-left-color: var(--cyan2);
+    }
+
+    .theme-toggle {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      padding: 7px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: all .2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .nav-item.active {
+      background: rgba(0, 212, 255, 0.07);
+      border-left-color: var(--cyan);
+    }
+
+    .nav-item.active .nav-label {
+      color: var(--cyan);
+    }
+
+    .nav-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text-dim);
+      width: 22px;
+      flex-shrink: 0;
+    }
+
+    .nav-label {
+      font-size: 12px;
+      color: var(--text2);
+      font-weight: 500;
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .nav-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 6px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .tag-basic {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan2);
+    }
+
+    .tag-combo {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green2);
+    }
+
+    .tag-seq {
+      background: rgba(179, 136, 255, 0.1);
+      color: var(--purple);
+    }
+
+    .nav-check {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--border2);
+      border-radius: 3px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 7px;
+      color: transparent;
+      transition: all .2s;
+    }
+
+    .nav-item.done .nav-check {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--bg);
+    }
+
+    .sidenav-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      padding: 40px 52px;
+      max-width: 1000px;
+    }
+
+    @media (max-width: 900px) {
+      .content {
+        padding: 24px 20px;
+      }
+
+      .sidenav {
+        width: 220px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .sidenav {
+        display: none;
+      }
+
+      .layout {
+        display: block;
+      }
+    }
+
+    /* ── HERO ── */
+    .doc-hero {
+      margin-bottom: 56px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 30px;
+      height: 1px;
+      background: var(--cyan);
+    }
+
+    .hero-title {
+      font-family: "Segoe UI", serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .hero-title .accent {
+      color: var(--cyan);
+    }
+
+    .hero-title .accent2 {
+      color: var(--green);
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.8;
+      max-width: 620px;
+      margin-bottom: 24px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--cyan);
+      line-height: 1;
+      display: block;
+    }
+
+    .hero-stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      letter-spacing: 1px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hero-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+
+    /* ── CONCEPT ALERT (Professor note) ── */
+    .concept-alert {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.04), rgba(0, 255, 136, 0.02));
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-left: 3px solid var(--cyan);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .concept-alert::before {
+      /* Use a backslash to escape the apostrophe */
+      content: '👨‍🏫 PROFESSOR\'S NOTE';
+
+      /* OR use double quotes for the string */
+      /* content: "👨‍🏫 PROFESSOR'S NOTE"; */
+
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .concept-alert p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+
+    .warning-alert {
+      background: rgba(255, 140, 66, 0.04);
+      border: 1px solid rgba(255, 140, 66, 0.2);
+      border-left: 3px solid var(--orange);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+    }
+
+    .warning-alert::before {
+      content: '⚠ COMMON MISTAKE';
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--orange);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .warning-alert p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+
+    .exam-alert {
+      background: rgba(255, 110, 180, 0.04);
+      border: 1px solid rgba(255, 110, 180, 0.2);
+      border-left: 3px solid var(--pink);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+    }
+
+    .exam-alert::before {
+      content: '📝 EXAM FOCUS';
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--pink);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .exam-alert p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+
+    .realworld-alert {
+      background: rgba(179, 136, 255, 0.04);
+      border: 1px solid rgba(179, 136, 255, 0.2);
+      border-left: 3px solid var(--purple);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+    }
+
+    .realworld-alert::before {
+      content: '🌐 REAL-WORLD APPLICATION';
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--purple);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .realworld-alert p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .exp-section {
+      margin-bottom: 72px;
+      scroll-margin-top: 80px;
+    }
+
+    .exp-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border2);
+      position: relative;
+    }
+
+    .exp-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 80px;
+      height: 1px;
+      background: var(--cyan);
+    }
+
+    .exp-num-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--bg);
+      background: var(--cyan);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      letter-spacing: 2px;
+      flex-shrink: 0;
+      margin-top: 4px;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .exp-num-badge.seq {
+      background: var(--purple);
+      box-shadow: 0 0 20px rgba(179, 136, 255, 0.3);
+    }
+
+    .exp-num-badge.combo {
+      background: var(--green);
+      box-shadow: var(--glow-green);
+    }
+
+    .exp-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+    }
+
+    .exp-title span {
+      color: var(--cyan);
+    }
+
+    .exp-title.seq span {
+      color: var(--purple);
+    }
+
+    .exp-title.combo span {
+      color: var(--green);
+    }
+
+    .exp-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* ── 3D CARD ── */
+    .card-3d-wrap {
+      perspective: 1000px;
+      margin-bottom: 18px;
+    }
+
+    .card-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease;
+    }
+
+    .card-3d:hover {
+      transform: rotateX(2deg) rotateY(-1deg) translateZ(8px);
+    }
+
+    /* ── GRID ── */
+    .exp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media (max-width: 740px) {
+
+      .exp-grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── CARDS ── */
+    .exp-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all .25s;
+    }
+
+    .exp-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .exp-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+    }
+
+    .full-card {
+      grid-column: 1 / -1;
+    }
+
+    .exp-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .exp-card-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 10px;
+      background: var(--cyan);
+      border-radius: 2px;
+    }
+
+    .exp-card p,
+    .exp-card li {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.8;
+    }
+
+    .exp-card ul {
+      padding-left: 18px;
+    }
+
+    .exp-card li {
+      margin-bottom: 4px;
+    }
+
+    /* ── ANIMATED TRUTH TABLE ── */
+    .tt-wrap {
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .tt {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .tt thead tr th {
+      padding: 9px 14px;
+      color: var(--cyan);
+      border-bottom: 2px solid var(--border2);
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 1px;
+      background: var(--panel2);
+      position: relative;
+    }
+
+    .tt td {
+      padding: 7px 14px;
+      text-align: center;
+      border-bottom: 1px solid rgba(22, 32, 50, 0.6);
+      color: var(--text-dim);
+      transition: all .15s;
+    }
+
+    .tt td.one {
+      color: var(--green);
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    }
+
+    .tt td.zero {
+      color: var(--text3);
+    }
+
+    .tt tr:hover td {
+      background: rgba(0, 212, 255, 0.03);
+      color: var(--text);
+    }
+
+    /* ── INTERACTIVE TRUTH TABLE (simulated) ── */
+    .interactive-tt {
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .itt-header {
+      background: var(--panel2);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .itt-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+    }
+
+    .itt-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      color: var(--cyan);
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all .2s;
+    }
+
+    .itt-btn:hover {
+      background: rgba(0, 212, 255, 0.15);
+    }
+
+    /* ── BOOLEAN BOX ── */
+    .bool-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--cyan);
+      padding: 12px 16px;
+      background: rgba(0, 212, 255, 0.04);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-bottom: 12px;
+      line-height: 1.9;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .bool-box.green {
+      color: var(--green);
+      border-left-color: var(--green);
+      background: rgba(0, 255, 136, 0.03);
+    }
+
+    .bool-box.purple {
+      color: var(--purple);
+      border-left-color: var(--purple);
+      background: rgba(179, 136, 255, 0.03);
+    }
+
+    .bool-box.yellow {
+      color: var(--yellow);
+      border-left-color: var(--yellow);
+      background: rgba(255, 209, 102, 0.03);
+    }
+
+    .bool-box-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7px;
+      letter-spacing: 2px;
+      position: absolute;
+      top: -1px;
+      right: 10px;
+      background: var(--panel);
+      padding: 2px 6px;
+      color: var(--text3);
+    }
+
+    /* ── STEPS LIST ── */
+    .steps-list {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+    }
+
+    .steps-list li {
+      counter-increment: step;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+      position: relative;
+    }
+
+    .steps-list li::before {
+      content: counter(step, decimal-leading-zero);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 4px;
+      padding: 3px 8px;
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-top: 2px;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    /* ── KEY POINTS ── */
+    .key-points {
+      padding: 16px 20px;
+      background: rgba(255, 140, 66, 0.03);
+      border: 1px solid rgba(255, 140, 66, 0.12);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+
+    .key-points-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--orange);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .key-points-title::before {
+      content: '◆';
+      font-size: 7px;
+    }
+
+    .key-points ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .key-points li {
+      font-size: 13px;
+      color: var(--text2);
+      padding: 4px 0 4px 16px;
+      position: relative;
+      line-height: 1.7;
+      border-bottom: 1px solid rgba(255, 140, 66, 0.05);
+    }
+
+    .key-points li:last-child {
+      border-bottom: none;
+    }
+
+    .key-points li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--orange);
+      font-size: 9px;
+      top: 7px;
+    }
+
+    /* ── GATE VISUALIZER ── */
+    .circuit-box {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 24px 20px 20px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .circuit-box::before {
+      content: 'CIRCUIT DIAGRAM';
+      position: absolute;
+      top: 8px;
+      left: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7px;
+      color: var(--text3);
+      letter-spacing: 2px;
+    }
+
+    .circuit-box::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    svg.cdiag {
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── 3D FLIP CARD (for gate symbols) ── */
+    .gates-showcase {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 740px) {
+      .gates-showcase {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .gate-card {
+      perspective: 600px;
+      height: 110px;
+      cursor: pointer;
+    }
+
+    .gate-card-inner {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .gate-card:hover .gate-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .gate-face,
+    .gate-back {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border2);
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+    }
+
+    .gate-face {
+      background: var(--panel);
+    }
+
+    .gate-back {
+      background: var(--panel2);
+      transform: rotateY(180deg);
+      border-color: var(--cyan3);
+    }
+
+    .gate-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cyan);
+    }
+
+    .gate-sym {
+      font-size: 22px;
+    }
+
+    .gate-expr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--green);
+    }
+
+    .gate-desc {
+      font-size: 10px;
+      color: var(--text2);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .gate-card-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* ── SIGNAL FLOW DIAGRAM ── */
+    .signal-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .sf-node {
+      flex-shrink: 0;
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    .sf-node.in {
+      border-color: var(--cyan2);
+      color: var(--cyan);
+    }
+
+    .sf-node.gate {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: rgba(0, 229, 204, 0.04);
+    }
+
+    .sf-node.out {
+      border-color: var(--green2);
+      color: var(--green);
+    }
+
+    .sf-arr {
+      color: var(--border2);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ── SEPARATOR ── */
+    .exp-sep {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+      margin: 64px 0;
+      position: relative;
+    }
+
+    .exp-sep::after {
+      content: '◆';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg);
+      padding: 0 12px;
+      color: var(--border2);
+      font-size: 8px;
+    }
+
+    /* ── IC REFERENCE ── */
+    .ic-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 209, 102, 0.05);
+      border: 1px solid rgba(255, 209, 102, 0.15);
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--yellow);
+      margin: 3px 4px 3px 0;
+    }
+
+    .ic-box::before {
+      content: '💡';
+      font-size: 11px;
+    }
+
+    /* ── FORMULA HIGHLIGHT ── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(0, 212, 255, 0.07);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--cyan);
+    }
+
+    /* ── COMPARISON TABLE ── */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .comp-table th {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--cyan);
+      letter-spacing: 1px;
+      text-align: left;
+    }
+
+    .comp-table td {
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+
+    .comp-table tr:hover td {
+      background: rgba(0, 212, 255, 0.02);
+    }
+
+    /* ── MINI QUIZ ── */
+    .mini-quiz {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--pink);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .quiz-q {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .quiz-opt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--panel);
+    }
+
+    .quiz-opt:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .quiz-opt.correct {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.07);
+    }
+
+    .quiz-opt.wrong {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(255, 51, 85, 0.07);
+    }
+
+    .quiz-feedback {
+      font-size: 12px;
+      color: var(--text2);
+      font-style: italic;
+      display: none;
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    /* ── WAVEFORM DISPLAY ── */
+    .waveform-box {
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .waveform-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 52px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SCROLL PROGRESS ── */
+    #scroll-progress {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      z-index: 999;
+      transition: width .1s;
+      box-shadow: var(--glow-cyan);
+    }
+
+    /* ── BACK TO TOP ── */
+    #btt {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 42px;
+      height: 42px;
+      background: var(--panel2);
+      border: 1px solid var(--border2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all .3s;
+      z-index: 500;
+      color: var(--text2);
+    }
+
+    #btt.show {
+      opacity: 1;
+    }
+
+    #btt:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: translateY(-3px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    /* ── TOOLTIP ── */
+    [data-tip] {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dashed var(--text-dim);
+    }
+
+    [data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel3);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s;
+      z-index: 100;
+    }
+
+    [data-tip]:hover::after {
+      opacity: 1;
+    }
+
+    /* ── GLITCH TITLE EFFECT ── */
+    @keyframes glitchAnim {
+
+      0%,
+      95%,
+      100% {
+        clip-path: none;
+        transform: none;
+      }
+
+      96% {
+        clip-path: inset(30% 0 40% 0);
+        transform: translate(-2px, 0);
+      }
+
+      97% {
+        clip-path: inset(60% 0 10% 0);
+        transform: translate(2px, 0);
+      }
+
+      98% {
+        clip-path: none;
+        transform: none;
+      }
+    }
+
+    strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    em {
+      color: var(--cyan);
+      font-style: normal;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="bg-orb1"></div>
+  <div class="bg-orb2"></div>
+  <div class="bg-orb3"></div>
+  <div id="scroll-progress"></div>
+  <button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <img src="../logo.png" alt="SRM VoxLogic Logo"
+          style="width:100%;height:100%;object-fit:contain; background: transparent;">
+      </div>
+      <div>
+        <div class="logo-text">SRM <span>VoxLogic</span></div>
+        <span class="logo-sub">DIGITAL LOGIC DESIGN — LAB MANUAL</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge badge-live">INTERACTIVE</span>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <button class="search-btn" id="startLabBtn" onclick="startLab()">⌘ Start Lab →</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidenav">
+      <div class="sidenav-header">
+        <div class="sidenav-title">LAB PROGRESS</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="prog-bar"></div>
+        </div>
+        <div class="progress-label" id="prog-label">0 / 12 completed</div>
+      </div>
+
+      <div class="nav-section-label">Basic Gates</div>
+      <a class="nav-item" href="#exp1" data-id="exp1"><span class="nav-num">01</span><span class="nav-label">Logic
+          Gates</span><span class="nav-tag tag-basic">BASIC</span><span class="nav-check" data-check="exp1">✓</span></a>
+      <a class="nav-item" href="#exp2" data-id="exp2"><span class="nav-num">02</span><span class="nav-label">Universal
+          Gates</span><span class="nav-tag tag-basic">BASIC</span><span class="nav-check" data-check="exp2">✓</span></a>
+
+      <div class="nav-section-label">Combinational</div>
+      <a class="nav-item" href="#exp3" data-id="exp3"><span class="nav-num">03</span><span class="nav-label">Half Adder
+          / Sub</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check" data-check="exp3">✓</span></a>
+      <a class="nav-item" href="#exp4" data-id="exp4"><span class="nav-num">04</span><span class="nav-label">Full Adder
+          / Sub</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check" data-check="exp4">✓</span></a>
+      <a class="nav-item" href="#exp5" data-id="exp5"><span class="nav-num">05</span><span class="nav-label">4-bit
+          Adder</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check" data-check="exp5">✓</span></a>
+      <a class="nav-item" href="#exp6" data-id="exp6"><span class="nav-num">06</span><span class="nav-label">BCD
+          Adder</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check" data-check="exp6">✓</span></a>
+      <a class="nav-item" href="#exp7" data-id="exp7"><span class="nav-num">07</span><span class="nav-label">Code
+          Converters</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check"
+          data-check="exp7">✓</span></a>
+      <a class="nav-item" href="#exp8" data-id="exp8"><span class="nav-num">08</span><span class="nav-label">Encoders &
+          Decoders</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check"
+          data-check="exp8">✓</span></a>
+      <a class="nav-item" href="#exp9" data-id="exp9"><span class="nav-num">09</span><span class="nav-label">MUX &
+          DEMUX</span><span class="nav-tag tag-combo">COMBO</span><span class="nav-check" data-check="exp9">✓</span></a>
+
+      <div class="nav-section-label">Sequential</div>
+      <a class="nav-item" href="#exp10" data-id="exp10"><span class="nav-num">10</span><span class="nav-label">SR
+          Flip-Flop</span><span class="nav-tag tag-seq">SEQ</span><span class="nav-check"
+          data-check="exp10">✓</span></a>
+      <a class="nav-item" href="#exp11" data-id="exp11"><span class="nav-num">11</span><span class="nav-label">JK & D
+          Flip-Flop</span><span class="nav-tag tag-seq">SEQ</span><span class="nav-check"
+          data-check="exp11">✓</span></a>
+      <a class="nav-item" href="#exp12" data-id="exp12"><span class="nav-num">12</span><span class="nav-label">Counters
+          & Registers</span><span class="nav-tag tag-seq">SEQ</span><span class="nav-check"
+          data-check="exp12">✓</span></a>
+
+      <div class="sidenav-footer">SRM INSTITUTE · EEE DEPT<br>Digital Logic Design Lab</div>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="content">
+
+      <!-- HERO -->
+      <div class="doc-hero">
+        <div class="hero-eyebrow">DLD LAB MANUAL — AY 2025–26</div>
+        <h1 class="hero-title">Digital Logic<br><span class="accent">Design</span> <span
+            class="accent2">Laboratory</span></h1>
+        <p class="hero-desc">A complete, professor-curated reference for all 12 Digital Logic Design experiments. Every
+          circuit explained from first principles — understand <em>why</em>, not just <em>how</em>. Includes theory,
+          circuit diagrams, truth tables, Boolean expressions, real-world applications, and exam-focused summaries.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><span class="hero-stat-num">12</span><span class="hero-stat-label">EXPERIMENTS</span>
+          </div>
+          <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-label">GATE TYPES</span>
+          </div>
+          <div class="hero-stat"><span class="hero-stat-num">80+</span><span class="hero-stat-label">TRUTH TABLE
+              ROWS</span></div>
+          <div class="hero-stat"><span class="hero-stat-num">∞</span><span class="hero-stat-label">APPLICATIONS</span>
+          </div>
+        </div>
+        <div class="hero-badges">
+          <span class="hero-badge" style="color:var(--cyan);border-color:rgba(0,212,255,0.3)">COMBINATIONAL
+            CIRCUITS</span>
+          <span class="hero-badge" style="color:var(--green);border-color:rgba(0,255,136,0.3)">SEQUENTIAL
+            CIRCUITS</span>
+          <span class="hero-badge" style="color:var(--purple);border-color:rgba(179,136,255,0.3)">FLIP-FLOPS &
+            COUNTERS</span>
+          <span class="hero-badge" style="color:var(--orange);border-color:rgba(255,140,66,0.3)">SRM INSTITUTE</span>
+        </div>
+      </div>
+
+      <!-- ════════════════════ EXP 01 ════════════════════ -->
+      <section class="exp-section" id="exp1">
+        <div class="exp-header">
+          <span class="exp-num-badge">EXP 01</span>
+          <div>
+            <div class="exp-title"><span>Logic Gates</span> & Truth Tables</div>
+            <div class="exp-subtitle">COMBINATIONAL · FUNDAMENTAL GATES · IC SERIES: 74LS08 / 74LS32 / 74LS04</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Logic gates are the <strong>atoms of digital electronics</strong>. Every processor, memory chip, and
+            digital device you use is ultimately built from billions of these tiny switches. Before you can design any
+            complex circuit, you must understand how each gate behaves individually. Think of gates as simple decision
+            makers: they look at their inputs and produce an output based on a fixed rule.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>To study the truth tables and verify the logic operation of all fundamental gates: AND, OR, NOT, NAND,
+              NOR, XOR, and XNOR using the VoxLogic simulator. Understand the concept of Boolean algebra and how each
+              gate maps to a physical operation.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">WHAT IS A LOGIC GATE?</div>
+            <p>A logic gate is an electronic circuit that takes one or more binary inputs (<strong>0 = LOW =
+                0V</strong>, <strong>1 = HIGH = 5V</strong>) and produces a single binary output based on a logical
+              rule. In CMOS chips, transistors implement these rules at speeds of billions per second.</p>
+          </div>
+        </div>
+
+        <!-- 3D flip cards for gates -->
+        <div
+          style="margin-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:2px;">
+          HOVER GATE CARDS TO SEE TRUTH TABLE</div>
+        <div class="gates-showcase">
+          <div class="gate-card">
+            <div class="gate-card-inner">
+              <div class="gate-face">
+                <div class="gate-name">AND</div>
+                <div class="gate-sym">⊓</div>
+                <div class="gate-expr">Y = A·B</div>
+                <div class="gate-card-hint">hover to flip ↗</div>
+              </div>
+              <div class="gate-back">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px">
+                  TRUTH TABLE</div>
+                <table class="tt" style="font-size:9px">
+                  <thead>
+                    <tr>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>Y</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td>0</td>
+                      <td class="zero">0</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>1</td>
+                      <td class="zero">0</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>0</td>
+                      <td class="zero">0</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>1</td>
+                      <td class="one">1</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="gate-card">
+            <div class="gate-card-inner">
+              <div class="gate-face">
+                <div class="gate-name">OR</div>
+                <div class="gate-sym">⊔</div>
+                <div class="gate-expr">Y = A+B</div>
+                <div class="gate-card-hint">hover to flip ↗</div>
+              </div>
+              <div class="gate-back">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px">
+                  TRUTH TABLE</div>
+                <table class="tt" style="font-size:9px">
+                  <thead>
+                    <tr>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>Y</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td>0</td>
+                      <td class="zero">0</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>1</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>0</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>1</td>
+                      <td class="one">1</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="gate-card">
+            <div class="gate-card-inner">
+              <div class="gate-face">
+                <div class="gate-name">NAND</div>
+                <div class="gate-sym">⊓̄</div>
+                <div class="gate-expr">Y = (A·B)'</div>
+                <div class="gate-card-hint">hover to flip ↗</div>
+              </div>
+              <div class="gate-back">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px">
+                  TRUTH TABLE</div>
+                <table class="tt" style="font-size:9px">
+                  <thead>
+                    <tr>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>Y</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td>0</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>1</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>0</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>1</td>
+                      <td class="zero">0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="gate-card">
+            <div class="gate-card-inner">
+              <div class="gate-face">
+                <div class="gate-name">XOR</div>
+                <div class="gate-sym">⊕</div>
+                <div class="gate-expr">Y = A⊕B</div>
+                <div class="gate-card-hint">hover to flip ↗</div>
+              </div>
+              <div class="gate-back">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px">
+                  TRUTH TABLE</div>
+                <table class="tt" style="font-size:9px">
+                  <thead>
+                    <tr>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>Y</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td>0</td>
+                      <td class="zero">0</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>1</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>0</td>
+                      <td class="one">1</td>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <td>1</td>
+                      <td class="zero">0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="circuit-box">
+          <svg class="cdiag" viewBox="0 0 700 210" width="100%" height="200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Inputs -->
+            <line x1="20" y1="70" x2="95" y2="70" stroke="#00d4ff" stroke-width="1.5" />
+            <line x1="20" y1="100" x2="95" y2="100" stroke="#00d4ff" stroke-width="1.5" />
+            <text x="8" y="74" fill="#00d4ff" font-family="JetBrains Mono" font-size="10" font-weight="600">A</text>
+            <text x="8" y="104" fill="#00d4ff" font-family="JetBrains Mono" font-size="10" font-weight="600">B</text>
+            <!-- AND gate body -->
+            <path d="M95,55 L95,115 L115,115 A30,30 0 0,0 115,55 Z" stroke="#1e3a50" fill="#0c1420"
+              stroke-width="1.5" />
+            <line x1="95" y1="70" x2="115" y2="70" stroke="#00d4ff" stroke-width="1" stroke-dasharray="none" />
+            <line x1="95" y1="100" x2="115" y2="100" stroke="#00d4ff" stroke-width="1" />
+            <line x1="148" y1="85" x2="178" y2="85" stroke="#00ff88" stroke-width="2" filter="url(#glow)" />
+            <circle cx="178" cy="85" r="5" fill="#00ff88" opacity=".8" filter="url(#glow)" />
+            <text x="100" y="148" fill="#2d4a62" font-family="JetBrains Mono" font-size="9">AND</text>
+            <text x="93" y="165" fill="#2d4a62" font-family="JetBrains Mono" font-size="7">74LS08</text>
+            <!-- OR gate -->
+            <path d="M215,55 Q226,55 242,85 Q226,115 215,115 Q224,85 215,55Z" stroke="#1e3a50" fill="#0c1420"
+              stroke-width="1.5" />
+            <line x1="20" y1="70" x2="215" y2="70" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".35" />
+            <line x1="20" y1="100" x2="215" y2="100" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".35" />
+            <line x1="243" y1="85" x2="274" y2="85" stroke="#00ff88" stroke-width="2" filter="url(#glow)" />
+            <circle cx="274" cy="85" r="5" fill="#00ff88" opacity=".8" filter="url(#glow)" />
+            <text x="208" y="148" fill="#2d4a62" font-family="JetBrains Mono" font-size="9">OR</text>
+            <text x="203" y="165" fill="#2d4a62" font-family="JetBrains Mono" font-size="7">74LS32</text>
+            <!-- NOT gate (triangle + bubble) -->
+            <path d="M308,72 L336,85 L308,98Z" stroke="#1e3a50" fill="#0c1420" stroke-width="1.5" />
+            <circle cx="340" cy="85" r="5" stroke="#1e3a50" fill="#0c1420" stroke-width="1.5" />
+            <line x1="20" y1="85" x2="308" y2="85" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".2" />
+            <line x1="345" y1="85" x2="374" y2="85" stroke="#ff3355" stroke-width="2" filter="url(#glow)" />
+            <circle cx="374" cy="85" r="5" fill="#ff3355" opacity=".8" filter="url(#glow)" />
+            <text x="303" y="148" fill="#2d4a62" font-family="JetBrains Mono" font-size="9">NOT</text>
+            <text x="300" y="165" fill="#2d4a62" font-family="JetBrains Mono" font-size="7">74LS04</text>
+            <!-- NAND gate -->
+            <path d="M415,55 L415,115 L435,115 A30,30 0 0,0 435,55 Z" stroke="#1e3a50" fill="#0c1420"
+              stroke-width="1.5" />
+            <circle cx="469" cy="85" r="5" stroke="#1e3a50" fill="#0c1420" stroke-width="1.5" />
+            <line x1="20" y1="70" x2="415" y2="70" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".12" />
+            <line x1="20" y1="100" x2="415" y2="100" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".12" />
+            <line x1="474" y1="85" x2="504" y2="85" stroke="#ffd166" stroke-width="2" filter="url(#glow)" />
+            <circle cx="504" cy="85" r="5" fill="#ffd166" opacity=".8" filter="url(#glow)" />
+            <text x="413" y="148" fill="#2d4a62" font-family="JetBrains Mono" font-size="9">NAND</text>
+            <text x="408" y="165" fill="#2d4a62" font-family="JetBrains Mono" font-size="7">74LS00</text>
+            <!-- XOR gate -->
+            <path d="M540,55 Q551,55 566,85 Q551,115 540,115 Q549,85 540,55Z" stroke="#1e3a50" fill="#0c1420"
+              stroke-width="1.5" />
+            <path d="M534,55 Q539,85 534,115" stroke="#1e3a50" fill="none" stroke-width="1.5" />
+            <line x1="20" y1="70" x2="540" y2="70" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".07" />
+            <line x1="20" y1="100" x2="540" y2="100" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4,4"
+              opacity=".07" />
+            <line x1="567" y1="85" x2="600" y2="85" stroke="#b388ff" stroke-width="2" filter="url(#glow)" />
+            <circle cx="600" cy="85" r="5" fill="#b388ff" opacity=".8" filter="url(#glow)" />
+            <text x="535" y="148" fill="#2d4a62" font-family="JetBrains Mono" font-size="9">XOR</text>
+            <text x="530" y="165" fill="#2d4a62" font-family="JetBrains Mono" font-size="7">74LS86</text>
+            <!-- Legend -->
+            <text x="10" y="196" fill="#2d4a62" font-family="JetBrains Mono" font-size="8">INPUT: A, B</text>
+            <text x="160" y="196" fill="#00ff88" font-family="JetBrains Mono" font-size="8">GREEN = HIGH (1)</text>
+            <text x="380" y="196" fill="#ff3355" font-family="JetBrains Mono" font-size="8">RED = INVERTED</text>
+            <text x="555" y="196" fill="#b388ff" font-family="JetBrains Mono" font-size="8">PURPLE = XOR</text>
+          </svg>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">TRUTH TABLE — AND / OR / NAND / NOR</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>AND</th>
+                    <th>OR</th>
+                    <th>NAND</th>
+                    <th>NOR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                  </tr>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                  </tr>
+                  <tr>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                  </tr>
+                  <tr>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">TRUTH TABLE — XOR / XNOR / NOT</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>XOR</th>
+                    <th>XNOR</th>
+                    <th>NOT A</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                  </tr>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                  </tr>
+                  <tr>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                  </tr>
+                  <tr>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">BOOLEAN EXPRESSIONS</div>
+            <div class="bool-box">AND : Y = A · B<br>OR : Y = A + B<br>NOT : Y = A' (A-bar)</div>
+            <div class="bool-box green">NAND: Y = (A·B)'<br>NOR : Y = (A+B)'</div>
+            <div class="bool-box purple">XOR : Y = A ⊕ B = A'B + AB'<br>XNOR: Y = (A⊕B)' = AB + A'B'</div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">PHYSICAL ICs USED</div>
+            <p style="margin-bottom:8px;font-size:12px;color:var(--text2)">Each gate type has a corresponding TTL or
+              CMOS IC you'll use in real lab sessions:</p>
+            <div><span class="ic-box">74LS08 — Quad 2-input AND</span></div>
+            <div><span class="ic-box">74LS32 — Quad 2-input OR</span></div>
+            <div><span class="ic-box">74LS04 — Hex Inverter (NOT)</span></div>
+            <div><span class="ic-box">74LS00 — Quad 2-input NAND</span></div>
+            <div><span class="ic-box">74LS02 — Quad 2-input NOR</span></div>
+            <div><span class="ic-box">74LS86 — Quad 2-input XOR</span></div>
+          </div>
+        </div>
+
+        <!-- Mini Quiz -->
+        <div class="mini-quiz">
+          <div class="quiz-title">🧠 QUICK SELF-CHECK</div>
+          <div class="quiz-q">Which gate produces output 1 ONLY when inputs are different (unequal)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt"
+              onclick="checkQuiz(this,'wrong','The AND gate outputs 1 only when BOTH inputs are 1.')">AND</button>
+            <button class="quiz-opt"
+              onclick="checkQuiz(this,'wrong','XNOR outputs 1 when inputs are equal, not different.')">XNOR</button>
+            <button class="quiz-opt"
+              onclick="checkQuiz(this,'correct','Correct! XOR = Exclusive OR. Output is 1 when exactly one input is 1 — i.e., inputs differ.')">XOR</button>
+            <button class="quiz-opt"
+              onclick="checkQuiz(this,'wrong','NOR outputs 1 only when BOTH inputs are 0.')">NOR</button>
+          </div>
+          <div class="quiz-feedback" id="qf1"></div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 01</div>
+          <div class="exp-output-image">
+            <img src="images/exp1.png" alt="Experiment 1 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">All 7 basic gates with A=1, B=0 showing outputs: AND=0, OR=1, NOT A=0, NAND=1,
+            NOR=0, XOR=1, XNOR=0</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 1 from the sidebar. Gates (AND, OR, NOT, NAND, NOR, XOR, XNOR) appear on the canvas with
+              INPUT nodes.</li>
+            <li>Click the <strong>Wire tool (W)</strong> and connect INPUT nodes A, B to a gate's input ports. A wire
+              turns cyan when connected correctly.</li>
+            <li><strong>Double-click</strong> any INPUT node to toggle its value between 0 and 1. Green glow = logic
+              HIGH (1), dim = logic LOW (0).</li>
+            <li>Observe the output port — the wire color changes: <strong style="color:var(--green)">green glow = logic
+                1</strong>, dim blue = logic 0.</li>
+            <li>Click <strong>▶▶ Auto Truth Table</strong> in the toolbar to auto-cycle all 4 input combinations (00 →
+              01 → 10 → 11).</li>
+            <li>View the generated truth table in the <strong>Truth</strong> panel on the right. Each row highlights as
+              inputs cycle.</li>
+            <li>Click each gate to see its individual truth table with the currently active row highlighted in cyan.
+            </li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p><strong>AND gate</strong> — Used in address decoding: a memory chip activates only when all address lines
+            match. <strong>OR gate</strong> — Used in interrupt logic: any of several events can trigger a processor
+            interrupt. <strong>XOR gate</strong> — Used in parity checkers and CRC error-detection circuits in hard
+            drives and network cards. <strong>NAND/NOR</strong> — Used in CMOS transistor-level implementation of ALL
+            digital chips since the 1970s.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>NAND and NOR are <strong>Universal Gates</strong> — any Boolean function can be built using only NAND or
+              only NOR. This is why they dominate chip manufacturing (only one type of fabrication process needed).</li>
+            <li>XOR gives the <strong>Sum bit</strong> in arithmetic; AND gives the <strong>Carry bit</strong>. This is
+              the entire basis of binary addition.</li>
+            <li>XNOR is the <strong>equivalence detector</strong> — output is 1 when both inputs are equal.</li>
+            <li>NOT gate has only 1 input. AND, OR, NAND, NOR, XOR, XNOR require at least 2 inputs.</li>
+            <li>In CMOS technology, a 2-input NAND uses 4 transistors; AND uses 6. NAND is cheaper.</li>
+            <li>The Boolean variable uses · for AND, + for OR, and ' or overbar for NOT.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 02 ════════════════════ -->
+      <section class="exp-section" id="exp2">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 02</span>
+          <div>
+            <div class="exp-title combo"><span>Universal Gates</span> — NAND & NOR</div>
+            <div class="exp-subtitle">COMBINATIONAL · GATE REALIZATION · DE MORGAN'S THEOREM</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Why do we call NAND and NOR "universal"? Because <strong>any logic function can be expressed using only
+              NAND gates</strong> (or only NOR gates). This is enormously practical: chip manufacturers only need to
+            master one gate type. Intel's early 4004 processor and modern billion-transistor chips both use NAND/NOR as
+            their fundamental building block. De Morgan's Theorem is the mathematical proof that makes this possible.
+          </p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>Realize AND, OR, and NOT functions using only NAND gates. Then realize the same using only NOR gates.
+              Verify outputs match the corresponding basic gate truth tables using VoxLogic.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">DE MORGAN'S THEOREM</div>
+            <div class="bool-box">(A · B)' = A' + B'</div>
+            <div class="bool-box green">(A + B)' = A' · B'</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px">In English: "The complement of a product equals
+              the sum of complements, and vice versa." This is the engine behind universality.</p>
+          </div>
+        </div>
+
+        <div class="exp-grid grid-3">
+          <div class="exp-card">
+            <div class="exp-card-title">NOT USING NAND</div>
+            <div class="signal-flow" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3)">Tie both inputs of
+                NAND to A:</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="sf-node in">A</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node gate">NAND(A,A)</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node out">A'</span>
+              </div>
+            </div>
+            <div class="bool-box" style="font-size:10px">A NAND A = (A·A)' = A'</div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">AND USING NAND</div>
+            <div class="signal-flow" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3)">NAND → then invert
+                output:</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="sf-node in">A,B</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node gate">NAND1</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node gate">NAND2(tie)</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node out">A·B</span>
+              </div>
+            </div>
+            <div class="bool-box" style="font-size:10px">((A·B)')' = A·B</div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">OR USING NAND</div>
+            <div class="signal-flow" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3)">Invert both inputs,
+                then NAND:</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="sf-node in">A'</span><span class="sf-arr">→</span>
+                <span class="sf-node gate">NAND</span>
+                <span class="sf-arr">→</span>
+                <span class="sf-node out">A+B</span>
+              </div>
+            </div>
+            <div class="bool-box green" style="font-size:10px">A' NAND B' = (A'·B')' = A+B<br>(De Morgan)</div>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">NOR-BASED REALIZATION</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Symmetric to NAND — NOR with tied inputs =
+              NOT. Two inversions restore OR. Invert-then-NOR gives AND.</p>
+            <div class="bool-box purple" style="font-size:10px">NOT: A NOR A = (A+A)' = A'<br>OR: ((A+B)')' =
+              A+B<br>AND: A' NOR B' = (A'+B')' = A·B</div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">GATE COUNT COMPARISON</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>Function</th>
+                    <th>Using NAND</th>
+                    <th>Using NOR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="color:var(--text2)">NOT A</td>
+                    <td class="one">1 gate</td>
+                    <td class="one">1 gate</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text2)">AND</td>
+                    <td style="color:var(--cyan)">2 gates</td>
+                    <td style="color:var(--cyan)">3 gates</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text2)">OR</td>
+                    <td style="color:var(--cyan)">3 gates</td>
+                    <td style="color:var(--cyan)">2 gates</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text2)">XOR</td>
+                    <td style="color:var(--orange)">4 NAND gates</td>
+                    <td style="color:var(--orange)">5 NOR gates</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-alert">
+          <p>When tying both inputs of a NAND gate together, <strong>do not just connect wires loosely</strong> — both
+            input pins must receive the same signal. If A floats to different values on each pin due to poor wiring,
+            your NOT realization will fail. In real ICs, unused inputs must be tied to VCC (for NAND) or GND (for NOR).
+          </p>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 02</div>
+          <div class="exp-output-image">
+            <img src="images/exp2.png" alt="Experiment 2 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">Universal gates: NOT, AND, OR implemented using only NAND gates. A=1, B=1
+            shows outputs.</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 2. The canvas shows NAND-based realization. Drag extra gates from the component panel if
+              needed.</li>
+            <li><strong>NOT from NAND:</strong> Wire both input ports of one NAND gate to the SAME INPUT node A. Output
+              = A'.</li>
+            <li><strong>AND from NAND:</strong> NAND gate 1 gets A and B as inputs → output (A·B)' feeds both inputs of
+              NAND gate 2 (tied) → output = A·B. Toggle A and B and verify with AND truth table.</li>
+            <li><strong>OR from NAND:</strong> Two NAND gates each in NOT configuration (invert A and B), then their
+              outputs feed a 3rd NAND gate → output = A+B. Verify with OR truth table.</li>
+            <li>Click <strong>▶▶ Auto Truth Table</strong> to verify all 4 combinations automatically.</li>
+            <li>Switch to NOR palette and repeat. Build NOT, OR, AND using only NOR gates.</li>
+            <li>Compare the number of gates needed — note OR is cheaper in NAND, AND is cheaper in NOR.</li>
+          </ol>
+        </div>
+
+        <div class="exam-alert">
+          <p>Frequently asked in exams: <strong>"Draw AND gate using NAND gates"</strong> (needs 2 NANDs), <strong>"Draw
+              OR gate using NAND gates"</strong> (needs 3 NANDs), and <strong>"State De Morgan's theorem and
+              verify"</strong>. Also asked: <em>Why is NAND preferred over NOR in CMOS design?</em> — Answer: NAND has
+            lower propagation delay due to PMOS transistors being in parallel rather than series.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>A NAND gate with tied inputs = inverter. A NOR gate with tied inputs = inverter.</li>
+            <li>Universal gates reduce manufacturing cost — one IC type builds any logic circuit.</li>
+            <li>In CMOS: NAND is preferred because PMOS (pull-up) transistors are in parallel → faster, less area.</li>
+            <li>Every computer processor is fundamentally a massive network of NAND gates.</li>
+            <li>De Morgan's theorem allows conversion between AND-OR and NAND-NAND implementations directly.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 03 ════════════════════ -->
+      <section class="exp-section" id="exp3">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 03</span>
+          <div>
+            <div class="exp-title combo"><span>Half Adder</span> & Half Subtractor</div>
+            <div class="exp-subtitle">COMBINATIONAL · ARITHMETIC CIRCUITS · 1-BIT OPERATIONS</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Your calculator adds decimal numbers, but deep inside it adds binary bits. The <strong>Half Adder</strong>
+            is the simplest arithmetic circuit — it adds two 1-bit numbers. The word "half" is key: it can only handle
+            two inputs but cannot process a carry from a previous stage. Think of it as adding the rightmost column of a
+            multi-digit sum. You'll discover that XOR and AND gates together are all you need.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>Design and simulate a Half Adder that produces Sum (S) and Carry (C) for 1-bit addition, and a Half
+              Subtractor that produces Difference (D) and Borrow (Bo) for 1-bit subtraction. Verify all 4 input
+              combinations.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">INTUITION — WHY THESE GATES?</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8">When you add 1+1 in binary, result is
+              <strong>10</strong> (decimal 2). The <strong>0</strong> is the Sum, the <strong>1</strong> is the Carry.
+              XOR gives 0 (since inputs differ), AND gives 1 (carry). Perfect match! XOR is a natural binary adder for
+              the sum bit.
+            </p>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">HALF ADDER — BOOLEAN EXPRESSIONS</div>
+            <div class="bool-box green">Sum S = A ⊕ B<br>Carry C = A · B</div>
+            <p style="font-size:12px;color:var(--text2)">Circuit uses: 1 XOR gate + 1 AND gate (minimum 2 gates).</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">HALF SUBTRACTOR — BOOLEAN EXPRESSIONS</div>
+            <div class="bool-box">Difference D = A ⊕ B<br>Borrow Bo = A' · B</div>
+            <p style="font-size:12px;color:var(--text2)">Borrow occurs only when A=0 and B=1 (subtracting 1 from 0 needs
+              to borrow). Uses: 1 XOR + 1 NOT + 1 AND.</p>
+          </div>
+        </div>
+
+        <div class="tt-wrap">
+          <table class="tt">
+            <thead>
+              <tr>
+                <th>A</th>
+                <th>B</th>
+                <th>Sum S</th>
+                <th>Carry C</th>
+                <th style="border-left:1px solid var(--border2)">Diff D</th>
+                <th>Borrow Bo</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="zero">0</td>
+                <td class="zero">0</td>
+                <td class="zero">0</td>
+                <td class="zero">0</td>
+                <td class="zero" style="border-left:1px solid var(--border)">0</td>
+                <td class="zero">0</td>
+                <td style="color:var(--text3);font-size:10px;text-align:left;padding-left:10px">0+0=0, 0−0=0</td>
+              </tr>
+              <tr>
+                <td class="zero">0</td>
+                <td class="one">1</td>
+                <td class="one">1</td>
+                <td class="zero">0</td>
+                <td class="one" style="border-left:1px solid var(--border)">1</td>
+                <td class="one">1</td>
+                <td style="color:var(--text3);font-size:10px;text-align:left;padding-left:10px">0+1=1, 0−1 needs borrow
+                </td>
+              </tr>
+              <tr>
+                <td class="one">1</td>
+                <td class="zero">0</td>
+                <td class="one">1</td>
+                <td class="zero">0</td>
+                <td class="one" style="border-left:1px solid var(--border)">1</td>
+                <td class="zero">0</td>
+                <td style="color:var(--text3);font-size:10px;text-align:left;padding-left:10px">1+0=1, 1−0=1</td>
+              </tr>
+              <tr>
+                <td class="one">1</td>
+                <td class="one">1</td>
+                <td class="zero">0</td>
+                <td class="one">1</td>
+                <td class="zero" style="border-left:1px solid var(--border)">0</td>
+                <td class="zero">0</td>
+                <td style="color:var(--text3);font-size:10px;text-align:left;padding-left:10px">1+1=10 (carry!), 1−1=0
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 03</div>
+          <div class="exp-output-image">
+            <img src="images/exp3.png" alt="Experiment 3 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">Half Adder: XOR for Sum, AND for Carry. A=1, B=1 → Sum=0, Carry=1</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 3. Canvas shows INPUT nodes A and B, XOR gate, and AND gate already placed.</li>
+            <li>Wire INPUT A and B to both the XOR gate inputs AND the AND gate inputs simultaneously (fan-out = 2).
+            </li>
+            <li>Connect the XOR output → OUTPUT node labeled <strong style="color:var(--green)">S</strong> (Sum).</li>
+            <li>Connect the AND output → OUTPUT node labeled <strong style="color:var(--cyan)">C</strong> (Carry).</li>
+            <li><strong>Test case 1:</strong> A=0, B=0 → S=0, C=0. (0+0=0, no carry) ✓</li>
+            <li><strong>Test case 2:</strong> A=1, B=1 → S=0, C=1. (1+1=10 in binary — Sum=0, Carry=1) ✓</li>
+            <li><strong>Half Subtractor:</strong> Keep XOR for Difference. For Borrow: add a NOT gate on A, then
+              AND(NOT_A, B) → gives Borrow output.</li>
+            <li>Use Auto Truth Table to verify all 4 rows in sequence and confirm matches above table.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>The ALU (Arithmetic Logic Unit) inside every CPU — from your phone's ARM processor to a supercomputer's
+            Intel Xeon — is built from cascaded full adders, which are themselves made from half adders. The half adder
+            you're building today scales up to 64-bit addition used in modern 64-bit processors.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>Called <strong>"half"</strong> because it cannot accept a carry-in from a previous stage (no Cin input).
+              A Full Adder solves this.</li>
+            <li>XOR gate naturally produces Sum; AND gate naturally produces Carry. This is not a coincidence — it's a
+              mathematical property of binary addition.</li>
+            <li>A=1, B=1 → Sum=0, Carry=1 represents binary <code>10</code> = decimal 2. Never forget this!</li>
+            <li>For subtraction, borrow is 1 only when A=0 and B=1 (borrowing from the next column).</li>
+            <li>The circuit uses exactly 2 gates for the adder — the theoretical minimum for 1-bit addition.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 04 ════════════════════ -->
+      <section class="exp-section" id="exp4">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 04</span>
+          <div>
+            <div class="exp-title combo"><span>Full Adder</span> & Full Subtractor</div>
+            <div class="exp-subtitle">COMBINATIONAL · CASCADEABLE ARITHMETIC · 3-INPUT CIRCUIT</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>The Half Adder has a critical limitation: it can't handle a carry coming in from a previous bit position.
+            The <strong>Full Adder</strong> solves this by adding a third input — Carry-in (Cin). When you add
+            multi-digit binary numbers (e.g., 8-bit, 32-bit, 64-bit), each bit position gets the carry from the previous
+            position. The Full Adder enables this chain. It's essentially <strong>two Half Adders plus an OR
+              gate</strong>.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>Implement a Full Adder with Carry-in (Cin) enabling multi-bit cascading. Verify all 8 input combinations
+              (2³). Also implement a Full Subtractor with Borrow-in input and verify all 8 combinations.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">BOOLEAN EXPRESSIONS</div>
+            <div class="bool-box green">Sum S = A ⊕ B ⊕ Cin<br>Cout = (A·B) + (B·Cin) + (A·Cin)</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px">Cout is 1 whenever at least <strong>two</strong>
+              of the three inputs are 1. Think of it as majority logic for the carry.</p>
+          </div>
+        </div>
+
+        <div class="exp-card full-card" style="margin-bottom:16px">
+          <div class="exp-card-title">TRUTH TABLE — FULL ADDER (3 inputs → 8 rows)</div>
+          <div class="tt-wrap">
+            <table class="tt">
+              <thead>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>Cin</th>
+                  <th>Sum S</th>
+                  <th>Cout</th>
+                  <th>Decimal Equivalent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--text3);font-size:10px">0+0+0 = 0</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--text3);font-size:10px">0+0+1 = 1</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--text3);font-size:10px">0+1+0 = 1</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--text3);font-size:10px">0+1+1 = 2 (carry!)</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--text3);font-size:10px">1+0+0 = 1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--text3);font-size:10px">1+0+1 = 2 (carry!)</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--text3);font-size:10px">1+1+0 = 2 (carry!)</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td class="one">1</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--text3);font-size:10px">1+1+1 = 3 (Sum=1, Carry=1)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 04</div>
+          <div class="exp-output-image">
+            <img src="images/exp4.png" alt="Experiment 4 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">Full Adder: Two XORs, two ANDs, one OR. A=1, B=1, Cin=1 → Sum=1, Cout=1</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 4. Three INPUT gates: A, B, and Cin. The circuit has 2 XOR, 2 AND, 1 OR gate.</li>
+            <li><strong>Stage 1 — Half Adder 1:</strong> Wire A and B → XOR1 (output = P = A⊕B). Also wire A and B →
+              AND1 (output = Q = A·B).</li>
+            <li><strong>Stage 2 — Half Adder 2:</strong> Wire P (A⊕B) and Cin → XOR2 → this gives final <strong>Sum
+                S</strong>.</li>
+            <li>Wire P and Cin → AND2 (output = R). Wire Q and R → OR gate → this gives final <strong>Cout</strong>.
+            </li>
+            <li><strong>Critical test:</strong> Set A=1, B=1, Cin=1. Expected: Sum=1, Cout=1 (represents 1+1+1 = 11 in
+              binary = decimal 3).</li>
+            <li>Connect OUTPUT labels S and Cout to the appropriate gates, then run Auto Truth Table.</li>
+            <li>Use the <strong>STEP</strong> button to walk through the signal propagation stage by stage.</li>
+          </ol>
+        </div>
+
+        <div class="mini-quiz">
+          <div class="quiz-title">🧠 QUICK SELF-CHECK</div>
+          <div class="quiz-q">How many gates does a Full Adder require at minimum?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQuiz2(this,'wrong','2 gates is for a Half Adder.')">2 gates</button>
+            <button class="quiz-opt"
+              onclick="checkQuiz2(this,'correct','Correct! 2 XOR + 2 AND + 1 OR = 5 gates total.')">5 gates</button>
+            <button class="quiz-opt" onclick="checkQuiz2(this,'wrong','Close but not quite — 4 is not correct.')">4
+              gates</button>
+            <button class="quiz-opt" onclick="checkQuiz2(this,'wrong','8 is too many for a basic Full Adder.')">8
+              gates</button>
+          </div>
+          <div class="quiz-feedback" id="qf2"></div>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>Full Adder = <strong>two Half Adders + one OR gate</strong> for the carry. Remember this structure.</li>
+            <li>Carry-out (Cout) of one bit position becomes Carry-in (Cin) of the next — this chain is called
+              <strong>ripple carry</strong>.
+            </li>
+            <li>Standard building block of all multi-bit binary adders (4-bit, 8-bit, 32-bit, 64-bit).</li>
+            <li>Minimum gate count: <strong>5 gates</strong> (2 XOR + 2 AND + 1 OR).</li>
+            <li>The Full Adder also performs modulo-2 addition: Sum is always 0 or 1, never 2 or 3.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 05 ════════════════════ -->
+      <section class="exp-section" id="exp5">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 05</span>
+          <div>
+            <div class="exp-title combo"><span>4-bit Ripple</span> Carry Adder</div>
+            <div class="exp-subtitle">COMBINATIONAL · MULTI-BIT ARITHMETIC · IC: 74LS83</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Now that you can add 1 bit with a Full Adder, let's add 4-bit numbers — like adding two digits that range
+            from 0 to 15. We chain four Full Adders in series. The <strong>"ripple"</strong> refers to how the carry
+            travels — it starts at bit 0 and propagates ("ripples") through each stage. This delay is the main weakness:
+            the carry must propagate through all stages before the final result is valid.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>Chain four Full Adders to add two 4-bit numbers A[3:0] and B[3:0], producing a 5-bit output (Cout, S3,
+              S2, S1, S0). Test with decimal additions including overflow.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">CASCADING STRUCTURE</div>
+            <div class="bool-box" style="font-size:10px;line-height:2">FA0: A0 + B0 + 0 → S0, C0<br>FA1: A1 + B1 + C0 →
+              S1, C1<br>FA2: A2 + B2 + C1 → S2, C2<br>FA3: A3 + B3 + C2 → S3, Cout</div>
+            <p style="font-size:11px;color:var(--text3);margin-top:6px">Cin of FA0 is always tied to GND (0). Cout of
+              FA3 is the 5th output bit.</p>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">TEST EXAMPLES</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>A (decimal)</th>
+                    <th>B (decimal)</th>
+                    <th>Sum</th>
+                    <th>Overflow?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="color:var(--cyan)">7 (0111)</td>
+                    <td style="color:var(--cyan)">1 (0001)</td>
+                    <td class="one">8 (01000)</td>
+                    <td class="zero">No</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--cyan)">9 (1001)</td>
+                    <td style="color:var(--cyan)">6 (0110)</td>
+                    <td class="one">15 (01111)</td>
+                    <td class="zero">No</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--orange)">15 (1111)</td>
+                    <td style="color:var(--orange)">1 (0001)</td>
+                    <td style="color:var(--red)">16 (10000)</td>
+                    <td class="one">YES: Cout=1</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--orange)">15 (1111)</td>
+                    <td style="color:var(--orange)">15 (1111)</td>
+                    <td style="color:var(--red)">30 (11110)</td>
+                    <td class="one">YES: Cout=1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">RIPPLE CARRY DELAY ANALYSIS</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Each Full Adder has a
+              propagation delay <code>t_FA</code>. In the worst case, carry must ripple through all 4 stages:</p>
+            <div class="bool-box yellow">Total delay = 4 × t_FA<br>For 74LS83: ~16 ns worst case<br>For 64-bit: 64 ×
+              t_FA → very slow!</div>
+            <p style="font-size:11px;color:var(--text3);margin-top:6px">This is why <strong
+                data-tip="CLA computes all carries simultaneously, not sequentially">Carry Look-Ahead Adders
+                (CLA)</strong> were invented.</p>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 05</div>
+          <div class="exp-output-image">
+            <img src="images/exp5.png" alt="Experiment 5 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">4-bit Ripple Carry Adder: 8 inputs, 5 outputs showing 7+1=8 (01000)</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 5. Eight INPUT nodes: A3, A2, A1, A0, B3, B2, B1, B0.</li>
+            <li>Verify the internal connections: Cout of each FA is pre-wired to Cin of the next FA to the left.</li>
+            <li><strong>Test addition 7+1:</strong> Set A=0111 (A3=0,A2=1,A1=1,A0=1) and B=0001. Expected S=1000,
+              Cout=0.</li>
+            <li><strong>Test overflow:</strong> Set A=1111 (15) and B=0001 (1). Expected: S=0000, Cout=1 (overflow to
+              bit 4).</li>
+            <li>Click <strong>STEP</strong> to watch carry propagate: FA0 fires first, then FA1, FA2, FA3 in sequence.
+            </li>
+            <li>Note the delay — the last output S3 and Cout are valid only after carry ripples through all 4 stages.
+            </li>
+            <li>Try A=1001, B=0110 (9+6=15). Expected S=1111 (15), Cout=0.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>The <strong>Intel 4004 microprocessor (1971)</strong> used a 4-bit ripple carry adder. Modern CPUs use
+            Carry Look-Ahead (CLA) or Carry Save Adder (CSA) trees that reduce addition delay from O(n) to O(log n). The
+            74LS83 IC you may use in the real lab can add two 4-bit numbers in about 24 nanoseconds.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>Critical path delay = 4 × Full Adder delay due to sequential carry propagation (ripple).</li>
+            <li><strong>Carry Look-Ahead Adder (CLA)</strong> eliminates this by computing all carries simultaneously
+              using generate (G=A·B) and propagate (P=A⊕B) signals.</li>
+            <li>IC 74LS83 is a 4-bit binary full adder used in real hardware — available in your lab kit.</li>
+            <li>Maximum sum for 4-bit + 4-bit: 1111+1111 = 11110 (30 decimal), requiring 5 output bits.</li>
+            <li>Overflow flag (Cout) is critical: computers must detect when results exceed the representable range.
+            </li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 06 ════════════════════ -->
+      <section class="exp-section" id="exp6">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 06</span>
+          <div>
+            <div class="exp-title combo"><span>BCD Adder</span> Design</div>
+            <div class="exp-subtitle">COMBINATIONAL · DECIMAL ARITHMETIC · CORRECTION LOGIC</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Humans think in decimal (0–9), but computers work in binary (0–15 for 4 bits). The <strong>BCD (Binary
+              Coded Decimal)</strong> system represents each decimal digit using 4 binary bits. But when you add two BCD
+            digits, the sum can exceed 9 (the binary codes 1010–1111 are invalid in BCD). The BCD adder detects this and
+            adds 0110 (6) to "skip over" the 6 invalid codes, wrapping back to a valid BCD output.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">AIM</div>
+            <p>Add two BCD digits (0–9) and produce a valid BCD result. Detect when binary sum exceeds 9 or generates
+              carry, then apply 0110 (6) correction to restore valid BCD encoding.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">CORRECTION LOGIC</div>
+            <div class="bool-box yellow">Correct = C₄ + (S₃·S₂) + (S₃·S₁)</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:8px">Correction needed when: binary sum &gt; 9
+              (1010–1111), i.e., when S3=1 and (S2=1 or S1=1), or when a carry C4 was generated. Add 0110 (6) to skip
+              invalid BCD codes.</p>
+          </div>
+        </div>
+
+        <div class="exp-card full-card" style="margin-bottom:16px">
+          <div class="exp-card-title">BCD ADDITION EXAMPLE TABLE</div>
+          <div class="tt-wrap">
+            <table class="tt">
+              <thead>
+                <tr>
+                  <th>BCD A</th>
+                  <th>BCD B</th>
+                  <th>Binary Sum</th>
+                  <th>Correction?</th>
+                  <th>BCD Result</th>
+                  <th>Decimal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--cyan)">0011 (3)</td>
+                  <td style="color:var(--cyan)">0100 (4)</td>
+                  <td>0111</td>
+                  <td class="zero">No (≤9)</td>
+                  <td class="one">0111</td>
+                  <td style="color:var(--text3)">7</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--cyan)">0101 (5)</td>
+                  <td style="color:var(--cyan)">0111 (7)</td>
+                  <td>1100 (12)</td>
+                  <td class="one">Yes (+0110)</td>
+                  <td class="one">0010 + carry</td>
+                  <td style="color:var(--text3)">12</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--cyan)">1001 (9)</td>
+                  <td style="color:var(--cyan)">1001 (9)</td>
+                  <td>10010 (18)</td>
+                  <td class="one">Yes (+0110)</td>
+                  <td class="one">1000 + carry</td>
+                  <td style="color:var(--text3)">18</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--cyan)">0000 (0)</td>
+                  <td style="color:var(--cyan)">1001 (9)</td>
+                  <td>1001</td>
+                  <td class="zero">No (=9)</td>
+                  <td class="one">1001</td>
+                  <td style="color:var(--text3)">9</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 06</div>
+          <div class="exp-output-image">
+            <img src="images/exp6.png" alt="Experiment 6 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">BCD Adder: 5+7=12 showing correction logic active (Carry=1, BCD=0010)</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 6. Input nodes A3–A0 (BCD digit 1) and B3–B0 (BCD digit 2) — both must be 0000–1001
+              only.</li>
+            <li>Stage 1: Binary 4-bit adder produces intermediate sum S[3:0] and carry C4.</li>
+            <li>Observe the <strong>correction detect logic</strong>: green wire = correction required, dim = no
+              correction.</li>
+            <li>Stage 2 adder adds 0110 (0,1,1,0) when the Correct signal is HIGH.</li>
+            <li><strong>Test 5+7:</strong> Set A=0101, B=0111. Binary sum=1100 (12). Correct=1, +0110 → 00010010 = BCD 1
+              and 2 = decimal 12. ✓</li>
+            <li>Verify that for sums 0–9, Correct=0 (no adjustment needed).</li>
+            <li>For sums 10–18, Correct=1 and the carry output indicates tens digit = 1.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>BCD arithmetic is used in <strong>financial applications, ATMs, calculators, and accounting
+              systems</strong> where exact decimal precision matters. Binary floating-point (like IEEE 754) can't
+            represent 0.1 exactly, causing rounding errors. BCD avoids this. The <strong>Intel BCD adjust
+              instructions</strong> (DAA, DAS) in x86 assembly implement exactly this correction logic.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>BCD uses 4 bits per decimal digit; codes 1010–1111 (10–15) are <strong>invalid and never appear in BCD
+                output</strong>.</li>
+            <li>Correction value <strong>0110 (6)</strong> skips the 6 invalid codes (1010 through 1111).</li>
+            <li>Two 4-bit adder stages required: first computes binary sum, second applies correction.</li>
+            <li>Correction is needed when: binary sum &gt; 9 <strong>OR</strong> a carry is generated from the 4-bit
+              adder.</li>
+            <li>BCD wastes 6 codes out of 16 per digit, making it less efficient than pure binary but decimal-exact.
+            </li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 07 ════════════════════ -->
+      <section class="exp-section" id="exp7">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 07</span>
+          <div>
+            <div class="exp-title combo"><span>Code Converters</span> — BCD / Gray</div>
+            <div class="exp-subtitle">COMBINATIONAL · CODE CONVERSION · KARNAUGH MAP DESIGN</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Different systems use different binary codes for the same number. <strong>Gray code</strong> (also called
+            Reflected Binary Code) is special: consecutive values differ by exactly one bit. This property is critical
+            in mechanical shaft encoders — if the encoder is between two positions, only one bit changes, eliminating
+            glitches. In contrast, regular binary has positions where multiple bits flip simultaneously (e.g., 7→8:
+            0111→1000, all 4 bits change), causing momentary wrong readings.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">BINARY → GRAY CODE</div>
+            <div class="bool-box green">G3 = B3<br>G2 = B3 ⊕ B2<br>G1 = B2 ⊕ B1<br>G0 = B1 ⊕ B0</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px">The MSB (G3) stays the same. Each subsequent
+              Gray bit = XOR of adjacent binary bits. Only XOR gates needed — very simple!</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">GRAY → BINARY (Reverse)</div>
+            <div class="bool-box">B3 = G3<br>B2 = B3 ⊕ G2<br>B1 = B2 ⊕ G1<br>B0 = B1 ⊕ G0</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px">Reverse conversion is sequential — each binary
+              bit depends on the previous decoded bit. Note: uses decoded B values, not Gray values, in the chain.</p>
+          </div>
+        </div>
+
+        <div class="exp-card full-card" style="margin-bottom:16px">
+          <div class="exp-card-title">BINARY vs GRAY CODE TABLE (0–9)</div>
+          <div class="tt-wrap">
+            <table class="tt">
+              <thead>
+                <tr>
+                  <th>Decimal</th>
+                  <th>B3</th>
+                  <th>B2</th>
+                  <th>B1</th>
+                  <th>B0</th>
+                  <th style="border-left:1px solid var(--border2)">G3</th>
+                  <th>G2</th>
+                  <th>G1</th>
+                  <th>G0</th>
+                  <th>Bit Changes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td class="zero" style="border-left:1px solid var(--border)">0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--text3);font-size:10px">—</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--green);font-size:10px">1 bit</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td class="one">1</td>
+                  <td style="color:var(--green);font-size:10px">1 bit</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--green);font-size:10px">1 bit</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td class="zero">0</td>
+                  <td class="one">1</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--green);font-size:10px">1 bit</td>
+                </tr>
+                <tr>
+                  <td>7→8</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td class="one">1</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td class="zero">0</td>
+                  <td style="color:var(--red);font-size:10px">Binary: 4 bits! Gray: 1 bit ✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 07</div>
+          <div class="exp-output-image">
+            <img src="images/exp7.png" alt="Experiment 7 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">Binary to Gray Code: B3B2B1B0=0110 (6) → Gray=0101</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 7. Input nodes B3–B0 represent the 4-bit binary input.</li>
+            <li>XOR gates implement the Gray conversion: G3=B3 (buffer or direct wire), G2=B3⊕B2 (XOR gate), G1=B2⊕B1,
+              G0=B1⊕B0.</li>
+            <li>Toggle inputs to binary value 0110 (decimal 6) → expected Gray: 0101. Verify output.</li>
+            <li>Toggle to binary 0111 (7) → expected Gray: 0100. Confirm exactly 1 bit changed from step 3.</li>
+            <li>For Gray-to-Binary: build the reverse circuit using XOR gates in the sequential dependency chain.</li>
+            <li>Verify the key property: <strong>every consecutive Gray code pair differs by exactly 1 bit</strong>. Use
+              Auto Truth Table to scan 0–15.</li>
+            <li>Bonus: Implement BCD-to-Excess-3 by adding 0011 (3) to each BCD digit using a 4-bit adder.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>Gray code is used in <strong>optical encoders on CNC machines and robotic arms</strong> to detect shaft
+            angle. If the encoder reads between two positions, only 1 bit is ambiguous, so the error is at most 1 step.
+            Gray code is also used in <strong>Karnaugh maps</strong> (the columns and rows are labeled in Gray code
+            order to group adjacent minterms correctly). Every K-map you draw uses Gray code implicitly.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>Gray code changes <strong>only 1 bit between consecutive values</strong> — this is the defining and most
+              important property.</li>
+            <li>Binary 7→8 transition (0111→1000) flips 4 bits simultaneously — dangerous in hardware. Gray 7→8
+              (0100→1100) flips only 1 bit.</li>
+            <li>Gray code conversion uses <strong>only XOR gates</strong> — simple, fast, minimal gate count.</li>
+            <li><strong>Excess-3 code</strong> is BCD + 3 (e.g., decimal 5 = BCD 0101 = Excess-3 1000). It is
+              self-complementing: 9's complement is just bit inversion.</li>
+            <li>Karnaugh maps use Gray code ordering to ensure adjacent cells differ by 1 variable — enabling group
+              formation for minimization.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 08 ════════════════════ -->
+      <section class="exp-section" id="exp8">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 08</span>
+          <div>
+            <div class="exp-title combo"><span>Encoders</span> & Decoders</div>
+            <div class="exp-subtitle">COMBINATIONAL · DATA ROUTING · MEMORY ADDRESSING</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>A <strong>Decoder</strong> is like a switchboard operator: it receives a binary address and activates
+            exactly one output line. If you have 3 binary inputs (8 combinations), it drives exactly one of 8 output
+            lines HIGH. An <strong>Encoder</strong> does the reverse: one active input line → compressed binary code
+            output. These circuits are the foundation of <strong>memory address decoding</strong> — when your CPU
+            addresses RAM, a decoder selects which memory chip to activate.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">3-TO-8 DECODER OUTPUTS</div>
+            <div class="bool-box" style="font-size:10px;line-height:2">D0 = A'B'C' &nbsp; (minterm 0)<br>D1 = A'B'C
+              &nbsp; (minterm 1)<br>D2 = A'BC' &nbsp; (minterm 2)<br>D3 = A'BC &nbsp; (minterm 3)<br>D4 = AB'C' &nbsp;
+              (minterm 4)<br>D5 = AB'C &nbsp; (minterm 5)<br>D6 = ABC' &nbsp; (minterm 6)<br>D7 = ABC &nbsp; (minterm 7)
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">PRIORITY ENCODER (8-TO-3)</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:10px">Converts active input line
+              number to 3-bit binary. If multiple inputs active, <strong>highest-priority (highest-numbered) input
+                wins</strong>. Includes a Valid Output (V) bit = 1 if any input is active.</p>
+            <div class="bool-box green" style="font-size:10px">A2 = I4+I5+I6+I7<br>A1 = I2+I3+I6+I7<br>A0 = I1+I3+I5+I7
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">DECODER CASCADING</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8">Using the Enable pin, two 3-to-8 decoders can
+              form one 4-to-16 decoder:</p>
+            <div class="signal-flow" style="flex-direction:column;align-items:flex-start">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">A3=0 → enable IC1,
+                output D0–D7</div>
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">A3=1 → enable IC2,
+                output D8–D15</div>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">PRACTICAL IC REFERENCE</div>
+            <div><span class="ic-box">74LS138 — 3-to-8 Decoder (active LOW)</span></div>
+            <div><span class="ic-box">74LS148 — 8-to-3 Priority Encoder</span></div>
+            <div><span class="ic-box">74LS47 — BCD to 7-Segment Decoder</span></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3)">The 74LS138 has 3 enable pins (2 active-LOW, 1
+              active-HIGH) for easy cascading.</div>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 08</div>
+          <div class="exp-output-image">
+            <img src="images/exp8.png" alt="Experiment 8 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">3-to-8 Decoder: A=1,B=0,C=1 (binary 101) activates only D5 output</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 8. Three INPUT nodes A, B, C feed the decoder circuit.</li>
+            <li>Toggle A=1, B=0, C=1 (binary 101 = decimal 5). Verify <strong>only D5</strong> output wire turns green.
+            </li>
+            <li>Cycle through all 8 combinations (000–111) and confirm exactly one output active each time.</li>
+            <li>Switch to encoder mode: activate only one input line (e.g., I6 = HIGH) and verify binary output = 110.
+            </li>
+            <li>For priority encoder: activate multiple inputs (e.g., I3 and I6 simultaneously). Confirm output = 110
+              (I6 has higher priority than I3).</li>
+            <li>Test the Enable pin: set Enable=0. Verify ALL outputs go to their inactive state regardless of A, B, C.
+            </li>
+          </ol>
+        </div>
+
+        <div class="exam-alert">
+          <p>Very commonly asked in exams: <strong>"Implement a Full Adder using a 3-to-8 decoder."</strong> Key
+            insight: a decoder generates all minterms. The Sum function (S = Σm(1,2,4,7)) uses OR gates on outputs D1,
+            D2, D4, D7. Carry (Cout = Σm(3,5,6,7)) uses OR on D3, D5, D6, D7. This technique implements ANY Boolean
+            function using a decoder + OR gates.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>A 3-to-8 decoder generates all 8 <strong>minterms</strong> of 3 variables — making it a universal
+              combinational function generator.</li>
+            <li>Active-LOW decoders (74LS138) output 0 for selected line; active-HIGH output 1.</li>
+            <li>Enable pins allow cascading: two 3-to-8 decoders → one 4-to-16 decoder (16 outputs from one more address
+              bit).</li>
+            <li>Used in: memory address decoding (select which RAM/ROM chip responds), 7-segment display driving,
+              demultiplexing data.</li>
+            <li>A decoder is used as a <strong>DEMUX</strong> when a data input is connected: select lines route data to
+              one of N outputs.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 09 ════════════════════ -->
+      <section class="exp-section" id="exp9">
+        <div class="exp-header">
+          <span class="exp-num-badge combo">EXP 09</span>
+          <div>
+            <div class="exp-title combo"><span>MUX</span> & DEMUX</div>
+            <div class="exp-subtitle">COMBINATIONAL · DATA SELECTION · FUNCTION GENERATION</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>A <strong>Multiplexer (MUX)</strong> is a digital switch: select lines choose which of N input data lines
+            connects to the single output. Think of it as a programmable router. A <strong>DEMUX</strong> does the
+            opposite — routes one input to one of N outputs based on select lines. Crucially, a MUX can also implement
+            <strong>any Boolean function</strong> by tying its data inputs to 0s and 1s according to the truth table.
+          </p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">4:1 MUX — BOOLEAN EXPRESSION</div>
+            <div class="bool-box green" style="font-size:10px">Y = S̄1S̄0·I0 + S̄1S0·I1<br>&nbsp;&nbsp;&nbsp;&nbsp;+
+              S1S̄0·I2 + S1S0·I3</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px">Only the term with both select signals active
+              passes through to Y. All other terms are zero-gated.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">SELECT LINE TRUTH TABLE</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>S1</th>
+                    <th>S0</th>
+                    <th>Output Y</th>
+                    <th>Think of it as...</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td style="color:var(--cyan)">I0</td>
+                    <td style="color:var(--text3);font-size:10px">Channel 0 selected</td>
+                  </tr>
+                  <tr>
+                    <td>0</td>
+                    <td>1</td>
+                    <td style="color:var(--cyan)">I1</td>
+                    <td style="color:var(--text3);font-size:10px">Channel 1 selected</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>0</td>
+                    <td style="color:var(--cyan)">I2</td>
+                    <td style="color:var(--text3);font-size:10px">Channel 2 selected</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>1</td>
+                    <td style="color:var(--cyan)">I3</td>
+                    <td style="color:var(--text3);font-size:10px">Channel 3 selected</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">MUX AS FUNCTION GENERATOR</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:10px">To implement F(A,B) = A⊕B
+              using a 4:1 MUX: use A,B as select lines S1,S0. Set data inputs according to the truth table of XOR:</p>
+            <div class="bool-box" style="font-size:10px">I0=0 (F when A=0,B=0)<br>I1=1 (F when A=0,B=1)<br>I2=1 (F when
+              A=1,B=0)<br>I3=0 (F when A=1,B=1)</div>
+            <p style="font-size:11px;color:var(--text3);margin-top:6px">Output Y = XOR(A,B) without any XOR gate!</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">IC REFERENCE</div>
+            <div><span class="ic-box">74LS153 — Dual 4:1 MUX</span></div>
+            <div><span class="ic-box">74LS151 — 8:1 MUX (single)</span></div>
+            <div><span class="ic-box">74LS139 — Dual 2:4 DEMUX/Decoder</span></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3)">An 8:1 MUX can implement any 3-variable
+              Boolean function directly from its truth table.</div>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 09</div>
+          <div class="exp-output-image">
+            <img src="images/exp9.png" alt="Experiment 9 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">4:1 Multiplexer: S1=0,S0=0 selects I0; output follows I0</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 9. Input nodes: I0–I3 (data inputs) and S0, S1 (select lines).</li>
+            <li>Set S1=0, S0=0 (select I0). Toggle I0 and observe output Y follows I0 (I1, I2, I3 have no effect).</li>
+            <li>Set S1=1, S0=1 (select I3). Toggle I3 and confirm Y mirrors I3 exactly.</li>
+            <li><strong>Function implementation:</strong> To implement F=A·B+A'·B', set S1=A, S0=B. Set I0=1, I1=0,
+              I2=0, I3=1 (this is XNOR). Verify output matches XNOR truth table.</li>
+            <li>For DEMUX: set data D=1, then change select lines to route D to output 0, 1, 2, or 3 in sequence.
+              Observe only one output HIGH at a time.</li>
+            <li>Verify: DEMUX with all-zero select = data routed to output 0. Other outputs remain 0.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>MUX circuits are used in <strong>time-division multiplexing</strong> — sharing one communication channel
+            among multiple signals by rapidly switching between them. Your <strong>DRAM memory controller</strong> uses
+            multiplexers to reduce pin count: row and column addresses share the same pins (sent in two separate
+            cycles). In FPGAs, every logic cell contains a 4:1 or 8:1 MUX that can implement arbitrary Boolean
+            functions.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>A 2ⁿ:1 MUX can implement any Boolean function of <strong>n+1 variables</strong> by fixing data inputs to
+              0/1 per truth table row.</li>
+            <li>DEMUX = decoder with a data input; same hardware, different application.</li>
+            <li>MUX reduces wiring: instead of N separate wires, one shared wire + log₂N select wires — used in
+              chip-to-chip communication.</li>
+            <li>A 4:1 MUX needs: 4 AND gates (3-input), 1 OR gate (4-input) — or equivalent NAND array.</li>
+            <li>FPGAs (Field Programmable Gate Arrays) implement logic using look-up tables (LUTs), which are
+              essentially large MUX arrays.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 10 ════════════════════ -->
+      <section class="exp-section" id="exp10">
+        <div class="exp-header">
+          <span class="exp-num-badge seq">EXP 10</span>
+          <div>
+            <div class="exp-title seq"><span>SR Flip-Flop</span> (NAND Latch)</div>
+            <div class="exp-subtitle">SEQUENTIAL · BISTABLE MEMORY ELEMENT · FIRST MEMORY CIRCUIT</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>Everything so far has been <strong>combinational</strong> — outputs depend only on current inputs. Now we
+            enter the realm of <strong>sequential logic</strong> — circuits with <em>memory</em>. The SR Flip-Flop is
+            your first sequential circuit: its output depends on BOTH current inputs AND past history. This is the
+            fundamental breakthrough that makes computers possible — without memory, a computer can only compute, not
+            store. The SR latch uses just 2 NAND gates wired in a feedback loop.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">SR NAND LATCH STATE TABLE</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>S̄ (Set)</th>
+                    <th>R̄ (Reset)</th>
+                    <th>Q</th>
+                    <th>Q'</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>1</td>
+                    <td colspan="2" style="color:var(--text-dim);font-size:10px">Q unchanged</td>
+                    <td style="color:var(--cyan)">HOLD (Memory)</td>
+                  </tr>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td>1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td style="color:var(--green)">SET (Q=1)</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td style="color:var(--orange)">RESET (Q=0)</td>
+                  </tr>
+                  <tr>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td style="color:var(--red)">FORBIDDEN ⚠</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">HOW THE FEEDBACK WORKS</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8">Two NAND gates, each gate's output fed back to
+              the other's input:</p>
+            <div class="signal-flow" style="flex-direction:column;gap:8px">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">Gate 1: inputs = S̄,
+                Q' → output Q</div>
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">Gate 2: inputs = R̄,
+                Q → output Q'</div>
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--green)">Q feeds Gate 2; Q'
+                feeds Gate 1.</div>
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--cyan)">This loop creates
+                stable MEMORY states.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-alert">
+          <p>The <strong>FORBIDDEN state</strong> (S̄=0, R̄=0 simultaneously) forces both outputs Q=1 and Q'=1, which
+            violates the complementary rule (Q and Q' must always be opposite). When you then release both inputs to
+            1,1, the latch races to one stable state — but which state it ends in is <strong>unpredictable</strong>. In
+            real circuits, this causes timing-dependent bugs that are extremely hard to debug. Always avoid S=R=0 in
+            NAND SR latches.</p>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 10</div>
+          <div class="exp-output-image">
+            <img src="images/exp10.png" alt="Experiment 10 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">SR NAND Latch: S=0,R=1 (SET) → Q=1, Q'=0; state held after S returns to 1
+          </div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 10. Two INPUT nodes S̄ and R̄, two cross-coupled NAND gates, two OUTPUT nodes Q and Q'.
+            </li>
+            <li><strong>Initial state:</strong> Both S̄=1, R̄=1 → HOLD state. Q retains whatever state it was in
+              previously.</li>
+            <li><strong>SET operation:</strong> Change S̄ to 0 (R̄ stays 1). Observe Q→1 and Q'→0. The latch is SET.
+            </li>
+            <li>Release S̄ back to 1. CRITICAL: Q stays at 1. This demonstrates <strong>memory</strong> — the state
+              persists even after removing the SET signal.</li>
+            <li><strong>RESET operation:</strong> Change R̄ to 0 (S̄ stays 1). Observe Q→0 and Q'→1.</li>
+            <li>Release R̄ back to 1. Q stays at 0. Confirm memory is retained again.</li>
+            <li>View the <strong>Wave panel</strong> — observe Q holds its state as flat line between SET and RESET
+              pulses.</li>
+            <li><strong>NEVER</strong> set both S̄=0 and R̄=0 simultaneously — this is the forbidden state.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>SR latches are used to <strong>debounce mechanical switches</strong>. When a push-button is pressed, its
+            metal contacts bounce 10–100 times in the first millisecond, generating spurious 0→1→0 transitions. An SR
+            latch captures the first edge and ignores the bouncing. Every keyboard key in your computer uses debouncing
+            logic of this type.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>This is the first <strong>sequential circuit</strong>: output depends on both current inputs AND
+              previous state (memory).</li>
+            <li>NAND SR latch: active-LOW inputs. S̄=0 → Set; R̄=0 → Reset. Confusingly, <strong>0 activates</strong>,
+              not 1.</li>
+            <li>Forbidden state: S=0, R=0 causes Q=Q'=1, violating complementarity. Result after release is
+              unpredictable.</li>
+            <li>This simple latch is the <strong>building block of all flip-flops</strong> — JK, D, T are all derived
+              from it.</li>
+            <li>In SRAM (Static RAM), each bit is stored using 6 transistors implementing an SR latch (cross-coupled
+              inverters).</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 11 ════════════════════ -->
+      <section class="exp-section" id="exp11">
+        <div class="exp-header">
+          <span class="exp-num-badge seq">EXP 11</span>
+          <div>
+            <div class="exp-title seq"><span>JK</span> & D Flip-Flops</div>
+            <div class="exp-subtitle">SEQUENTIAL · CLOCKED FLIP-FLOPS · REGISTER ELEMENTS</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>The SR latch has a fatal flaw — the forbidden state. The <strong>JK Flip-Flop</strong> fixes this by
+            converting S=R=1 from "forbidden" into a useful <strong>TOGGLE</strong> operation (Q flips to its
+            complement). The JK FF is clocked — it only changes state on a clock edge (rising or falling), making it
+            synchronizable in digital systems. The <strong>D Flip-Flop</strong> simplifies further: it samples the D
+            input and stores it at each clock edge — the most widely used storage element in CPUs.</p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">JK FLIP-FLOP CHARACTERISTIC TABLE</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>J</th>
+                    <th>K</th>
+                    <th>Qn+1</th>
+                    <th>Operation</th>
+                    <th>Condition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td style="color:var(--cyan)">Qn</td>
+                    <td style="color:var(--text2)">No Change</td>
+                    <td style="color:var(--text3);font-size:10px">Hold previous state</td>
+                  </tr>
+                  <tr>
+                    <td>0</td>
+                    <td>1</td>
+                    <td class="zero">0</td>
+                    <td style="color:var(--orange)">RESET</td>
+                    <td style="color:var(--text3);font-size:10px">Q forced to 0</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="one">1</td>
+                    <td style="color:var(--green)">SET</td>
+                    <td style="color:var(--text3);font-size:10px">Q forced to 1</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>1</td>
+                    <td style="color:var(--purple)">Qn'</td>
+                    <td style="color:var(--purple)">TOGGLE</td>
+                    <td style="color:var(--text3);font-size:10px">NOT forbidden! Q flips.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">D FLIP-FLOP</div>
+            <div class="bool-box green">Qn+1 = D (captures on ↑ CLK edge)</div>
+            <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.8">D FF samples and stores the D
+              input value at each <strong>rising clock edge</strong>. Between clock edges, D can change freely — it only
+              matters what D is at the moment of the clock edge. Eliminates forbidden state by internally tying J=D and
+              K=D'.</p>
+            <div class="bool-box" style="font-size:10px;margin-top:8px">D FF from JK: Connect D→J and D'→K (via
+              inverter). The FF now has only one data input.</div>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">JK vs D vs T COMPARISON</div>
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>JK FF</th>
+                  <th>D FF</th>
+                  <th>T FF</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Inputs</td>
+                  <td>J, K, CLK</td>
+                  <td>D, CLK</td>
+                  <td>T, CLK</td>
+                </tr>
+                <tr>
+                  <td>Special state</td>
+                  <td>Toggle (J=K=1)</td>
+                  <td>None</td>
+                  <td>Toggle (T=1)</td>
+                </tr>
+                <tr>
+                  <td>Forbidden?</td>
+                  <td>No</td>
+                  <td>No</td>
+                  <td>No</td>
+                </tr>
+                <tr>
+                  <td>Main use</td>
+                  <td>Counters</td>
+                  <td>Registers</td>
+                  <td>Dividers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">RACE-AROUND CONDITION</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">In a
+              <strong>level-triggered</strong> JK with J=K=1, if the clock stays HIGH for too long, Q toggles multiple
+              times (races around). Solution:
+            </p>
+            <ul style="font-size:12px;color:var(--text2);padding-left:16px;line-height:1.8">
+              <li>Use edge-triggered (master-slave) JK FFs</li>
+              <li>Keep clock pulse width shorter than gate propagation delay</li>
+            </ul>
+            <p style="font-size:11px;color:var(--orange);margin-top:6px">⚠ All modern FFs are edge-triggered to avoid
+              this.</p>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 11</div>
+          <div class="exp-output-image">
+            <img src="images/exp11.png" alt="Experiment 11 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">JK Flip-Flop: J=1,K=1 toggles Q on each clock edge</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 11. INPUT nodes: J, K, and CLK (for JK FF); also D and CLK (for D FF).</li>
+            <li><strong>JK — SET:</strong> Set J=1, K=0. Toggle CLK (0→1 rising edge). Observe Q→1, Q'→0. Verify SET
+              operation.</li>
+            <li><strong>JK — RESET:</strong> Set J=0, K=1. Toggle CLK. Observe Q→0, Q'→1. Verify RESET.</li>
+            <li><strong>JK — TOGGLE:</strong> Set J=1, K=1. Toggle CLK 4 times rapidly. Observe Q alternates: 0,1,0,1.
+              This is frequency division (÷2)!</li>
+            <li><strong>JK — HOLD:</strong> Set J=0, K=0. Toggle CLK multiple times. Q does not change.</li>
+            <li><strong>D FF:</strong> Set D=1, click CLK (0→1). Q becomes 1. Change D=0, click CLK. Q becomes 0. Q
+              always follows D at clock edge.</li>
+            <li>Open the <strong>Wave tab</strong> to see CLK vs Q waveforms. Note Q changes only on clock edges, not
+              when D changes between edges.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>Every register in your CPU is made of D flip-flops. A 64-bit CPU has 64 D flip-flops for each register
+            (RAX, RBX, etc.), plus thousands for pipeline stages, branch predictors, cache control, etc. The D
+            flip-flop's clock is your <strong>CPU clock frequency</strong> (e.g., 4 GHz = 4 billion times per second).
+            The JK toggle mode is used in <strong>binary counters and frequency dividers</strong> — the exact circuit in
+            your smartphone's clock generator.</p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>JK resolves SR's forbidden state: J=K=1 gives <strong>TOGGLE</strong> instead of forbidden output.</li>
+            <li>Race-around condition: level-triggered JK with J=K=1 and long clock pulse → multiple toggles. Fix: use
+              master-slave or edge-triggered design.</li>
+            <li>D flip-flop is the most common storage element — used in every register in every CPU and GPU.</li>
+            <li>T flip-flop = JK with J=K=T permanently wired. T=0 → hold; T=1 → toggle. Used in ripple counters.</li>
+            <li>One D flip-flop stores <strong>one bit</strong>. 8 D-FFs = one byte register. 64 D-FFs = one 64-bit
+              register.</li>
+          </ul>
+        </div>
+      </section>
+      <div class="exp-sep"></div>
+
+      <!-- ════════════════════ EXP 12 ════════════════════ -->
+      <section class="exp-section" id="exp12">
+        <div class="exp-header">
+          <span class="exp-num-badge seq">EXP 12</span>
+          <div>
+            <div class="exp-title seq"><span>Counters</span> & Registers</div>
+            <div class="exp-subtitle">SEQUENTIAL · STATE MACHINES · RIPPLE AND SYNCHRONOUS DESIGN</div>
+          </div>
+        </div>
+
+        <div class="concept-alert">
+          <p>A <strong>Counter</strong> is a sequential circuit that advances through a defined sequence of states with
+            each clock pulse. The simplest — the ripple counter — chains JK flip-flops in toggle mode. Each FF divides
+            the clock frequency by 2. A 3-bit ripple counter gives you 8 states (000–111) before wrapping. A
+            <strong>Shift Register</strong> moves data through a chain of D flip-flops, converting serial-to-parallel or
+            parallel-to-serial — fundamental for communication protocols like UART, SPI, and I²C.
+          </p>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">3-BIT RIPPLE COUNTER SEQUENCE</div>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>Clock</th>
+                    <th>Q2</th>
+                    <th>Q1</th>
+                    <th>Q0</th>
+                    <th>Decimal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td style="color:var(--text-dim)">0</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td style="color:var(--text-dim)">1</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td style="color:var(--text-dim)">2</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td style="color:var(--text-dim)">3</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td style="color:var(--text-dim)">4</td>
+                  </tr>
+                  <tr>
+                    <td>5</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td style="color:var(--text-dim)">5</td>
+                  </tr>
+                  <tr>
+                    <td>6</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td style="color:var(--text-dim)">6</td>
+                  </tr>
+                  <tr>
+                    <td>7</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td style="color:var(--text-dim)">7</td>
+                  </tr>
+                  <tr>
+                    <td>8</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td style="color:var(--cyan)">0 (wraps!)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">RIPPLE vs SYNCHRONOUS COUNTER</div>
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Ripple</th>
+                  <th>Synchronous</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Clock</td>
+                  <td style="color:var(--orange)">Cascaded (async)</td>
+                  <td style="color:var(--green)">Common to all FFs</td>
+                </tr>
+                <tr>
+                  <td>Speed</td>
+                  <td style="color:var(--orange)">Slow (delay adds)</td>
+                  <td style="color:var(--green)">Fast (simultaneous)</td>
+                </tr>
+                <tr>
+                  <td>Glitches</td>
+                  <td style="color:var(--red)">Yes</td>
+                  <td style="color:var(--green)">No</td>
+                </tr>
+                <tr>
+                  <td>Circuit</td>
+                  <td style="color:var(--green)">Simple</td>
+                  <td style="color:var(--orange)">Complex</td>
+                </tr>
+                <tr>
+                  <td>IC example</td>
+                  <td>74LS93</td>
+                  <td>74LS163</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card">
+            <div class="exp-card-title">SHIFT REGISTER — 4 MODES</div>
+            <div class="bool-box green" style="font-size:10px">SIPO: Serial-In, Parallel-Out<br>SISO: Serial-In,
+              Serial-Out<br>PIPO: Parallel-In, Parallel-Out<br>PISO: Parallel-In, Serial-Out</div>
+            <p style="font-size:11px;color:var(--text3);margin-top:8px">IC 74HC194 supports all 4 modes with a 2-bit
+              mode select.</p>
+          </div>
+          <div class="exp-card">
+            <div class="exp-card-title">SIPO SHIFT EXAMPLE</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Loading 1011 serially into 4
+              D-FFs:</p>
+            <div class="tt-wrap">
+              <table class="tt">
+                <thead>
+                  <tr>
+                    <th>Clock</th>
+                    <th>D-in</th>
+                    <th>Q3</th>
+                    <th>Q2</th>
+                    <th>Q1</th>
+                    <th>Q0</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td class="zero">0</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="one">1</td>
+                    <td class="zero">0</td>
+                    <td class="one">1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:11px;color:var(--green);margin-top:4px">After 4 clocks: Q3Q2Q1Q0 = 1011 ✓</p>
+          </div>
+        </div>
+
+        <!-- OUTPUT IMAGE -->
+        <div class="exp-output">
+          <div class="exp-output-header">SIMULATOR OUTPUT — EXPERIMENT 12</div>
+          <div class="exp-output-image">
+            <img src="images/exp12.png" alt="Experiment 12 Circuit Output" onerror="this.src='images/placeholder.png'">
+          </div>
+          <div class="exp-output-caption">3-bit Ripple Counter: Clock pulses showing Q2Q1Q0 counting
+            000→001→010→011→100→101→110→111→000</div>
+        </div>
+
+        <div class="exp-card" style="margin-bottom:16px">
+          <div class="exp-card-title">HOW TO OPERATE</div>
+          <ol class="steps-list">
+            <li>Load Experiment 12. CLK, RESET, and D-in INPUT nodes present.</li>
+            <li><strong>Counter mode:</strong> Press STEP repeatedly. Observe Q2, Q1, Q0 incrementing in binary:
+              000→001→010→...→111→000.</li>
+            <li>After step 8, verify the counter wraps back to 000 (modulo-8 behavior). Total states = 2³ = 8.</li>
+            <li>Switch to <strong>Auto-Sim</strong> for automatic clocking. Open Wave tab to see Q2 has half the
+              frequency of Q1, which has half of Q0 — each FF is a divide-by-2 circuit.</li>
+            <li><strong>Shift register mode:</strong> Set D-in, then press STEP 4 times loading bits one at a time.</li>
+            <li>Load pattern <strong>1,0,1,1</strong> (MSB first): clock in 1 → 0 → 1 → 1. After 4 clocks, parallel
+              outputs Q3Q2Q1Q0 should show 1011.</li>
+            <li>Press RESET and try another pattern. Verify SIPO conversion is correct.</li>
+          </ol>
+        </div>
+
+        <div class="realworld-alert">
+          <p>Counters are everywhere: your computer's <strong>Program Counter (PC)</strong> is a counter that increments
+            with each instruction fetched. Shift registers implement <strong>serial communication protocols</strong>
+            (UART: keyboard/mouse, SPI: SD cards/sensors, I²C: displays/sensors). Your Wi-Fi chip, Bluetooth module, and
+            USB interface all use shift registers to convert between serial data transmission and parallel processing.
+            The 74HC595 shift register IC is used in Arduino projects to drive multiple LEDs from just 3 wires.</p>
+        </div>
+
+        <div class="exam-alert">
+          <p>Common exam questions: <strong>"Draw a MOD-5 counter"</strong> (use NAND gate to detect count=5 and reset).
+            <strong>"Why is ripple counter called asynchronous?"</strong> (each FF clocks from previous FF output, not
+            common clock). <strong>"What is the maximum count of a 4-bit counter?"</strong> (2⁴−1 = 15, 16 states
+            total). <strong>"Draw waveforms for a 3-bit ripple counter"</strong> — Q0 frequency = CLK/2, Q1 = CLK/4, Q2
+            = CLK/8.
+          </p>
+        </div>
+
+        <div class="key-points">
+          <div class="key-points-title">KEY POINTS</div>
+          <ul>
+            <li>Ripple counter is <strong>asynchronous</strong> — FFs clock at different times, causing momentary
+              glitches as carry ripples through.</li>
+            <li>Synchronous counters have all FFs clocked together — glitch-free, faster, but require more complex
+              combinational logic.</li>
+            <li>n-bit counter has 2ⁿ states. 3-bit → 8 states (mod-8). 4-bit → 16 states (mod-16). For mod-N, add NAND
+              reset at count N.</li>
+            <li>Each stage of a ripple counter <strong>divides frequency by 2</strong>. A 3-bit counter on a 8 MHz clock
+              gives Q0=4MHz, Q1=2MHz, Q2=1MHz.</li>
+            <li>Shift registers convert between serial and parallel. SIPO loads 1 bit/clock and reads N bits
+              simultaneously. PISO reads N bits simultaneously and outputs 1 bit/clock.</li>
+            <li>IC 74HC194 is a 4-bit universal shift register supporting all 4 modes with 2-bit mode select pins.</li>
+            <li>Counters form the basis of: program counters, timers, memory address generators, and frequency dividers
+              in CPUs.</li>
+          </ul>
+        </div>
+      </section>
+
+    </div><!-- end content -->
+  </div><!-- end layout -->
+
+  <footer>
+    <span>SRM VoxLogic Enhanced Lab Manual — Digital Logic Design</span>
+    <span id="ft-progress">0 / 12 experiments marked complete</span>
+    <span>SRM Institute of Science and Technology © 2026</span>
+  </footer>
+
+  <script>
+    // ── SCROLL PROGRESS BAR
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      document.getElementById('scroll-progress').style.width = progress + '%';
+
+      // Back to top button
+      document.getElementById('btt').classList.toggle('show', scrollTop > 300);
+    });
+
+    // ── SIDEBAR ACTIVE HIGHLIGHT
+    const sections = document.querySelectorAll('.exp-section');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navItems.forEach(item => item.classList.remove('active'));
+          const id = entry.target.id;
+          const active = document.querySelector(`.nav-item[href="#${id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+
+    // ── EXPERIMENT COMPLETION TRACKER
+    let completed = new Set(JSON.parse(localStorage.getItem('dld_completed') || '[]'));
+
+    function updateProgress() {
+      const pct = (completed.size / 12) * 100;
+      document.getElementById('prog-bar').style.width = pct + '%';
+      document.getElementById('prog-label').textContent = `${completed.size} / 12 completed`;
+      document.getElementById('ft-progress').textContent = `${completed.size} / 12 experiments marked complete`;
+      localStorage.setItem('dld_completed', JSON.stringify([...completed]));
+    }
+
+    navItems.forEach(item => {
+      const id = item.dataset.id;
+      if (!id) return;
+      if (completed.has(id)) item.classList.add('done');
+
+      item.addEventListener('dblclick', () => {
+        if (completed.has(id)) {
+          completed.delete(id);
+          item.classList.remove('done');
+        } else {
+          completed.add(id);
+          item.classList.add('done');
+        }
+        updateProgress();
+      });
+    });
+
+    updateProgress();
+
+    // ── QUIZ FUNCTIONS
+    function checkQuiz(btn, result, msg) {
+      const parent = btn.closest('.mini-quiz');
+      const fb = parent.querySelector('.quiz-feedback');
+      parent.querySelectorAll('.quiz-opt').forEach(b => {
+        b.classList.remove('correct', 'wrong');
+        b.disabled = true;
+      });
+      btn.classList.add(result);
+      fb.textContent = (result === 'correct' ? '✓ ' : '✗ ') + msg;
+      fb.className = 'quiz-feedback show';
+      fb.style.color = result === 'correct' ? 'var(--green)' : 'var(--red)';
+    }
+
+    function checkQuiz2(btn, result, msg) {
+      const parent = btn.closest('.mini-quiz');
+      const fb = parent.querySelector('.quiz-feedback');
+      parent.querySelectorAll('.quiz-opt').forEach(b => {
+        b.classList.remove('correct', 'wrong');
+        b.disabled = true;
+      });
+      btn.classList.add(result);
+      fb.textContent = (result === 'correct' ? '✓ ' : '✗ ') + msg;
+      fb.className = 'quiz-feedback show';
+      fb.style.color = result === 'correct' ? 'var(--green)' : 'var(--red)';
+    }
+
+    function startLab() {
+      // Find which experiment is currently active/visible
+      const activeNav = document.querySelector('.nav-item.active');
+      if (activeNav) {
+        const href = activeNav.getAttribute('href'); // e.g. "#exp1"
+        const expNum = href.replace('#exp', '');
+        window.location.href = `try2ds.html?exp=${expNum}`;
+      } else {
+        window.location.href = 'try2ds.html';
+      }
+    }
+
+    // ── TOOLTIP HINT
+    const hint = document.createElement('div');
+    hint.style.cssText = 'position:fixed;bottom:100px;right:24px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:6px;padding:8px 14px;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--cyan);z-index:400;letter-spacing:1px;pointer-events:none;opacity:0;transition:opacity .4s';
+    hint.textContent = 'DOUBLE-CLICK sidebar items to mark complete';
+    document.body.appendChild(hint);
+    setTimeout(() => { hint.style.opacity = '1'; }, 2000);
+    setTimeout(() => { hint.style.opacity = '0'; }, 6000);
+
+
+    // Add this INSIDE the existing <script> tag, preferably at the top or bottom
+
+    // ── HASH NAVIGATION FOR EXPERIMENTS ──
+    function scrollToExperiment() {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#exp-')) {
+        const targetElement = document.querySelector(hash);
+        if (targetElement) {
+          // Small delay to ensure page is fully loaded
+          setTimeout(() => {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Optional: Add a highlight effect
+            targetElement.style.transition = 'all 0.3s';
+            targetElement.style.borderLeft = '3px solid var(--green)';
+            setTimeout(() => {
+              targetElement.style.borderLeft = '';
+            }, 2000);
+          }, 300);
+        }
+      }
+    }
+
+    // ── LIGHT/DARK THEME TOGGLE ──
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+
+      if (isDark) {
+        html.setAttribute('data-theme', 'light');
+        document.getElementById('themeToggle').textContent = '☀️';
+        localStorage.setItem('manual-theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').textContent = '🌙';
+        localStorage.setItem('manual-theme', 'dark');
+      }
+    }
+
+    // Load saved theme on page load
+    function loadSavedTheme() {
+      const savedTheme = localStorage.getItem('manual-theme');
+      const html = document.documentElement;
+
+      if (savedTheme === 'light') {
+        html.setAttribute('data-theme', 'light');
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) themeBtn.textContent = '☀️';
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) themeBtn.textContent = '🌙';
+      }
+    }
+
+    // Call this at the end of the script, before the closing </script>
+  loadSavedTheme();
+
+  // Run on page load
+  window.addEventListener('load', scrollToExperiment);
+
+  // Also run when hash changes (if user clicks another link)
+  window.addEventListener('hashchange', scrollToExperiment);
+  </script>
+</body>
+
+</html>
