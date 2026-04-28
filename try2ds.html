@@ -3759,6 +3759,22 @@
       return 'Your circuit is ready. Please load an experiment from the sidebar or add gates to the canvas.';
     }
 
+    // Add this helper function BEFORE sendAI if not present
+    function getCircuitContext() {
+      try {
+        if (typeof gates !== 'undefined' && gates && gates.length > 0) {
+          const gateCount = gates.length;
+          const inputCount = gates.filter(g => g.type === 'INPUT').length;
+          const outputCount = gates.filter(g => g.type === 'OUTPUT').length;
+          const wireCount = typeof wires !== 'undefined' ? wires.length : 0;
+          return `${gateCount} gates (${inputCount} inputs, ${outputCount} outputs) with ${wireCount} wire connections.`;
+        }
+        return 'No circuit loaded on canvas. Please load an experiment or add gates to build a circuit.';
+      } catch (e) {
+        return 'Circuit is ready for simulation.';
+      }
+    }
+
     async function sendAI() {
       const input = document.getElementById('aiInput');
       const msg = input.value.trim();
@@ -3782,7 +3798,7 @@
 
       document.getElementById('aiSendBtn').disabled = true;
 
-      const exp = EXPERIMENTS.find(e => e.id === currentExp);
+      const exp = typeof EXPERIMENTS !== 'undefined' ? EXPERIMENTS.find(e => e.id === currentExp) : null;
       const circuitCtx = getCircuitContext();
 
       const systemPrompt = `You are an expert Digital Logic Design tutor for engineering students at SRMIST Kattankulathur.
@@ -3794,8 +3810,8 @@ Do not use markdown symbols like ** or ##. Use plain text only.
 Always relate answers to the DLD lab curriculum and the current experiment when relevant.`;
 
       try {
-        // Call your backend server (API key is safely stored in .env on server)
-        const response = await fetch('http://localhost:8080/api/ai', {
+        // Use relative path for Vercel - this will work both locally and in production
+        const response = await fetch('/api/ai', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -3818,7 +3834,7 @@ Always relate answers to the DLD lab curriculum and the current experiment when 
 
         td.innerHTML = '<div class="msg-lbl">▸ AI TUTOR</div>' + reply.replace(/\n/g, '<br>');
 
-        if (voiceEnabled) speak(reply.slice(0, 200));
+        if (typeof voiceEnabled !== 'undefined' && voiceEnabled) speak(reply.slice(0, 200));
 
       } catch (err) {
         console.log('AI ERROR:', err);

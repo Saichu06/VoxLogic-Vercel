@@ -1,21 +1,37 @@
 {
-  "name": "voxlogic-host",
+  "name": "voxlogic",
   "version": "1.0.0",
-  "description": "eLogic — Digital Logic Simulator\r Project Description\r eLogic is an interactive web-based digital logic simulator developed for the Digital Logic Design Laboratory at SRM Institute of Science and Technology. It allows students to design, simulate, and analyze digital circuits without physical hardware components.",
-  "main": "index.js",
+  "description": "SRM VoxLogic - Digital Logic Simulator for SRMIST DLD Laboratory",
+  "main": "api/ai.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js"
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod",
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "build": "echo 'No build step required'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "digital-logic",
+    "simulator",
+    "education",
+    "ai-tutor",
+    "srm",
+    "verilog"
+  ],
+  "author": "SRMIST DLD Laboratory",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "node-fetch": "^3.3.2",
-    "nodemon": "^3.1.14"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "vercel": "^32.0.0"
   }
 }
