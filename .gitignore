@@ -28,3 +28,5 @@ Thumbs.db
 # Build outputs
 dist/
 build/
+.vercel
+.env*.local
