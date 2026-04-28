@@ -1,11 +1,8 @@
 {
   "name": "voxlogic",
   "version": "1.0.0",
-  "main": "index.html",
   "scripts": {
-    "build": "echo \"No build step required\"",
-    "vercel-dev": "vercel dev",
-    "deploy": "vercel deploy --prod"
+    "build": "echo \"No build step required\""
   },
   "type": "commonjs"
 }
