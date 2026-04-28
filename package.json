@@ -1,38 +1,11 @@
 {
   "name": "voxlogic",
   "version": "1.0.0",
-  "description": "SRM VoxLogic - Digital Logic Simulator for SRMIST DLD Laboratory",
-  "main": "api/ai.js",
+  "main": "index.html",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "server": "nodemon server.js",
     "build": "echo \"No build step required\"",
     "vercel-dev": "vercel dev",
     "deploy": "vercel deploy --prod"
   },
-  "keywords": [
-    "digital-logic",
-    "simulator",
-    "education",
-    "ai-tutor",
-    "srm",
-    "verilog"
-  ],
-  "author": "SRMIST DLD Laboratory",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "type": "commonjs",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "node-fetch": "^2.7.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1",
-    "vercel": "^32.0.0"
-  }
+  "type": "commonjs"
 }
